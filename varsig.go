@@ -43,10 +43,16 @@ type Varsig interface {
 	Encode() []byte
 }
 
-// Decode converts the provided data into one of the registered Varsig
-// types.
+// Decode converts the provided data into one of the Varsig types
+// provided by the DefaultRegistry.
 func Decode(data []byte) (Varsig, error) {
-	return DefaultSignAlgorithmRegistry().Decode(bytes.NewReader(data))
+	return DefaultRegistry().Decode(data)
+}
+
+// DecodeStream converts data read from the provided io.Reader into one
+// of the Varsig types provided by the DefaultRegistry.
+func DecodeStream(r *bytes.Reader) (Varsig, error) {
+	return DefaultRegistry().DecodeStream(r)
 }
 
 type varsig struct {
