@@ -100,7 +100,14 @@ func (v *varsig) encode() []byte {
 	return buf
 }
 
-func (v *varsig) decodeSignature(r *bytes.Reader, varsig Varsig, expectedLength uint64) (Varsig, error) {
+func (v *varsig) decodePayEncAndSig(r *bytes.Reader, varsig Varsig, expectedLength uint64) (Varsig, error) {
+	payEnc, err := DecodePayloadEncoding(r, v.Version())
+	if err != nil {
+		return nil, err
+	}
+
+	v.payEnc = payEnc
+
 	signature, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -108,10 +115,10 @@ func (v *varsig) decodeSignature(r *bytes.Reader, varsig Varsig, expectedLength 
 
 	v.sig = signature
 
-	return v.validateSignature(varsig, expectedLength)
+	return v.validateSig(varsig, expectedLength)
 }
 
-func (v *varsig) validateSignature(varsig Varsig, expectedLength uint64) (Varsig, error) {
+func (v *varsig) validateSig(varsig Varsig, expectedLength uint64) (Varsig, error) {
 	if v.Version() == Version0 && len(v.sig) == 0 {
 		return varsig, ErrMissingSignature
 	}
