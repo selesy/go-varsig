@@ -1,7 +1,9 @@
 package varsig_test
 
 import (
+	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"io"
 	"testing"
 
@@ -157,17 +159,31 @@ func TestDecode(t *testing.T) {
 	})
 }
 
-// func TestReadUvarint(t *testing.T) {
-// 	t.Parallel()
+func mustVarsig[T varsig.Varsig](t *testing.T) func(*T, error) *T {
+	t.Helper()
 
-// 	var r io.ByteReader = &bytes.Reader{}
+	return func(v *T, err error) *T {
+		if err != nil && ((*v).Version() != varsig.Version0 || !errors.Is(err, varsig.ErrMissingSignature)) {
+			t.Error(err)
+		}
 
-// 	u, err := binary.ReadUvarint(r)
-// 	require.ErrorIs(t, err, io.EOF)
-// 	assert.Equal(t, uint64(0), u)
+		return v
+	}
+}
 
-// 	var buf []byte
-// 	buf = binary.AppendUvarint(buf, 0x100)
-// 	t.Log("0x100 varint:", hex.EncodeToString(buf))
-// 	t.Fail()
-// }
+func roundTrip[T varsig.Varsig](t *testing.T, in T, expEncHex string) T {
+	data := in.Encode()
+	assert.Equal(t, expEncHex, base64.RawStdEncoding.EncodeToString(data))
+
+	out, err := varsig.Decode(in.Encode())
+	if err != nil && (out.Version() != varsig.Version0 || !errors.Is(err, varsig.ErrMissingSignature)) {
+		t.Fail()
+	}
+
+	assert.Equal(t, in.Version(), out.Version())
+	assert.Equal(t, in.SignatureAlgorithm(), out.SignatureAlgorithm())
+	assert.Equal(t, in.PayloadEncoding(), out.PayloadEncoding())
+	assert.Equal(t, in.Signature(), out.Signature())
+
+	return out.(T)
+}
