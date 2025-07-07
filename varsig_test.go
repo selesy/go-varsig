@@ -1,7 +1,6 @@
 package varsig_test
 
 import (
-	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"io"
@@ -173,7 +172,7 @@ func mustVarsig[T varsig.Varsig](t *testing.T) func(*T, error) *T {
 
 func roundTrip[T varsig.Varsig](t *testing.T, in T, expEncHex string) T {
 	data := in.Encode()
-	assert.Equal(t, expEncHex, base64.RawStdEncoding.EncodeToString(data))
+	assert.Equal(t, expEncHex, hex.EncodeToString(data))
 
 	out, err := varsig.Decode(in.Encode())
 	if err != nil && (out.Version() != varsig.Version0 || !errors.Is(err, varsig.ErrMissingSignature)) {

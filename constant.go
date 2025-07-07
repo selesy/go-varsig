@@ -14,9 +14,10 @@ type HashAlgorithm uint64
 
 const (
 	HashAlgorithmUnspecified HashAlgorithm = 0x00
-	HashAlgorithmSHA256      HashAlgorithm = HashAlgorithm(multicodec.Sha2_256)
-	HashAlgorithmSHA384      HashAlgorithm = HashAlgorithm(multicodec.Sha2_384)
-	HashAlgorithmSHA512      HashAlgorithm = HashAlgorithm(multicodec.Sha2_512)
+	HashAlgorithmSHA256                    = HashAlgorithm(multicodec.Sha2_256)
+	HashAlgorithmSHA384                    = HashAlgorithm(multicodec.Sha2_384)
+	HashAlgorithmSHA512                    = HashAlgorithm(multicodec.Sha2_512)
+	HashAlgorithmShake256                  = HashAlgorithm(multicodec.Shake256)
 )
 
 // DecodeHashAlgorithm reads and validates the expected hash algorithm
@@ -34,8 +35,9 @@ func DecodeHashAlgorithm(r *bytes.Reader) (HashAlgorithm, error) {
 		HashAlgorithmSHA256:      {},
 		HashAlgorithmSHA384:      {},
 		HashAlgorithmSHA512:      {},
+		HashAlgorithmShake256:    {},
 	}[h]; !ok {
-		return HashAlgorithmUnspecified, ErrUnknownHashAlgorithm
+		return HashAlgorithmUnspecified, fmt.Errorf("%w: %x", ErrUnknownHashAlgorithm, h)
 	}
 
 	return h, nil

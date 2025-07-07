@@ -8,11 +8,27 @@ import (
 	"github.com/selesy/go-varsig"
 )
 
+func TestEd25519(t *testing.T) {
+	t.Parallel()
+
+	in := mustVarsig[varsig.EdDSAVarsig](t)(varsig.Ed25519(varsig.PayloadEncodingDAGCBOR))
+	out := roundTrip(t, in, "3401ed01ed011371")
+	assertEdDSAEqual(t, in, out)
+}
+
+func TestEd448(t *testing.T) {
+	t.Parallel()
+
+	in := mustVarsig[varsig.EdDSAVarsig](t)(varsig.Ed448(varsig.PayloadEncodingDAGCBOR))
+	out := roundTrip(t, in, "3401ed0183241971")
+	assertEdDSAEqual(t, in, out)
+}
+
 func TestRS256(t *testing.T) {
 	t.Parallel()
 
 	in := mustVarsig[varsig.RSAVarsig](t)(varsig.RS256(0x100, varsig.PayloadEncodingDAGCBOR))
-	out := roundTrip(t, in, "NAGFJBKAAnE")
+	out := roundTrip(t, in, "3401852412800271")
 	assertRSAEqual(t, in, out)
 }
 
@@ -20,7 +36,7 @@ func TestRS384(t *testing.T) {
 	t.Parallel()
 
 	in := mustVarsig[varsig.RSAVarsig](t)(varsig.RS384(0x100, varsig.PayloadEncodingDAGCBOR))
-	out := roundTrip(t, in, "NAGFJCCAAnE")
+	out := roundTrip(t, in, "3401852420800271")
 	assertRSAEqual(t, in, out)
 }
 
@@ -28,8 +44,15 @@ func TestRS512(t *testing.T) {
 	t.Parallel()
 
 	in := mustVarsig[varsig.RSAVarsig](t)(varsig.RS512(0x100, varsig.PayloadEncodingDAGCBOR))
-	out := roundTrip(t, in, "NAGFJBOAAnE")
+	out := roundTrip(t, in, "3401852413800271")
 	assertRSAEqual(t, in, out)
+}
+
+func assertEdDSAEqual(t *testing.T, in, out *varsig.EdDSAVarsig) {
+	t.Helper()
+
+	assert.Equal(t, in.Curve(), out.Curve())
+	assert.Equal(t, in.HashAlgorithm(), out.HashAlgorithm())
 }
 
 func assertRSAEqual(t *testing.T, in, out *varsig.RSAVarsig) {

@@ -26,7 +26,8 @@ type Registry map[SignAlgorithm]DecodeFunc
 func DefaultRegistry() Registry {
 	return map[SignAlgorithm]DecodeFunc{
 		SignAlgorithmRSA:            decodeRSA,
-		SignAlgorithmEd25519:        notYetImplementedVarsigDecoder,
+		SignAlgorithmEdDSA:          decodeEd25519,
+		SignAlgorithmEd448:          decodeEd25519,
 		SignAlgorithmECDSAP256:      notYetImplementedVarsigDecoder,
 		SignAlgorithmECDSASecp256k1: notYetImplementedVarsigDecoder,
 		SignAlgorithmECDSAP521:      notYetImplementedVarsigDecoder,
