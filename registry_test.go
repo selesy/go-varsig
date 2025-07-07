@@ -52,13 +52,13 @@ func testRegistry(t *testing.T) varsig.Registry {
 	t.Helper()
 
 	reg := varsig.NewRegistry()
-	reg.Register(testSignAlgorithm0, testParseFunc(t))
-	reg.Register(testSignAlgorithm1, testParseFunc(t))
+	reg.Register(testSignAlgorithm0, testDecodeFunc(t))
+	reg.Register(testSignAlgorithm1, testDecodeFunc(t))
 
 	return reg
 }
 
-func testParseFunc(t *testing.T) varsig.ParseFunc {
+func testDecodeFunc(t *testing.T) varsig.DecodeFunc {
 	t.Helper()
 
 	return func(r *bytes.Reader, vers varsig.Version, signAlg varsig.SignAlgorithm) (varsig.Varsig, error) {

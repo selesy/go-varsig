@@ -55,7 +55,7 @@ func DecodeStream(r *bytes.Reader) (Varsig, error) {
 	return DefaultRegistry().DecodeStream(r)
 }
 
-type varsig struct {
+type varsig[T Varsig] struct {
 	vers    Version
 	signAlg SignAlgorithm
 	payEnc  PayloadEncoding
@@ -63,30 +63,30 @@ type varsig struct {
 }
 
 // Version returns the varsig's version field.
-func (v *varsig) Version() Version {
+func (v varsig[_]) Version() Version {
 	return v.vers
 }
 
 // SignatureAlgorithm returns the algorithm used to produce corresponding
 // signature.
-func (v *varsig) SignatureAlgorithm() SignAlgorithm {
+func (v varsig[_]) SignatureAlgorithm() SignAlgorithm {
 	return v.signAlg
 }
 
 // PayloadEncoding returns the codec that was used to encode the signed
 // data.
-func (v *varsig) PayloadEncoding() PayloadEncoding {
+func (v varsig[_]) PayloadEncoding() PayloadEncoding {
 	return v.payEnc
 }
 
 // Signature returns the cryptographic signature of the signed data. This
 // value is never present in a varsig >= v1 and must either be a valid
 // signature with the correct length or empty in varsig < v1.
-func (v *varsig) Signature() []byte {
+func (v varsig[_]) Signature() []byte {
 	return v.sig
 }
 
-func (v *varsig) encode() []byte {
+func (v *varsig[_]) encode() []byte {
 	var buf []byte
 
 	buf = binary.AppendUvarint(buf, Prefix)
@@ -100,7 +100,7 @@ func (v *varsig) encode() []byte {
 	return buf
 }
 
-func (v *varsig) decodePayEncAndSig(r *bytes.Reader, varsig Varsig, expectedLength uint64) (Varsig, error) {
+func (v *varsig[T]) decodePayEncAndSig(r *bytes.Reader, varsig *T, expectedLength uint64) (*T, error) {
 	payEnc, err := DecodePayloadEncoding(r, v.Version())
 	if err != nil {
 		return nil, err
@@ -118,7 +118,7 @@ func (v *varsig) decodePayEncAndSig(r *bytes.Reader, varsig Varsig, expectedLeng
 	return v.validateSig(varsig, expectedLength)
 }
 
-func (v *varsig) validateSig(varsig Varsig, expectedLength uint64) (Varsig, error) {
+func (v *varsig[T]) validateSig(varsig *T, expectedLength uint64) (*T, error) {
 	if v.Version() == Version0 && len(v.sig) == 0 {
 		return varsig, ErrMissingSignature
 	}
