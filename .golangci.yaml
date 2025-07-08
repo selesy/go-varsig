@@ -31,7 +31,7 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/selesy/go-varsig
+        - github.com/ucan-wg/go-varsig
   exclusions:
     generated: lax
     paths:

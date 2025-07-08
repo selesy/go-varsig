@@ -1,4 +1,4 @@
-module github.com/selesy/go-varsig
+module github.com/ucan-wg/go-varsig
 
 go 1.24.4
 

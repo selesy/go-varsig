@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/selesy/go-varsig"
+	"github.com/ucan-wg/go-varsig"
 )
 
 func TestEd25519(t *testing.T) {

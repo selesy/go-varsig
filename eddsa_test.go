@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/selesy/go-varsig"
+	"github.com/ucan-wg/go-varsig"
 )
 
 func TestDecodeEd25519(t *testing.T) {
