@@ -6,11 +6,11 @@ import (
 	"fmt"
 )
 
-// Version represents which version of the vasig specification was used
+// Version represents which version of the varsig specification was used
 // to produce Varsig value.
 type Version uint64
 
-// Constancts for the existing varsig specifications
+// Constants for the existing varsig specifications
 const (
 	Version0 Version = 0
 	Version1 Version = 1
@@ -18,9 +18,9 @@ const (
 
 // DecodeFunc is a function that parses the varsig representing a specific
 // signing algorithm.
-type DecodeFunc func(*bytes.Reader, Version, Discriminator) (Varsig, error)
+type DecodeFunc func(BytesReader, Version, Discriminator) (Varsig, error)
 
-// Registry contains a mapping between known signing algorithms, and
+// Registry contains a mapping between known signing algorithms and
 // functions that can parse varsigs for that signing algorithm.
 type Registry map[Discriminator]DecodeFunc
 
@@ -56,7 +56,7 @@ func (rs Registry) Decode(data []byte) (Varsig, error) {
 
 // DecodeStream converts data read from the provided io.Reader into one
 // of the registered Varsig types.
-func (rs Registry) DecodeStream(r *bytes.Reader) (Varsig, error) {
+func (rs Registry) DecodeStream(r BytesReader) (Varsig, error) {
 	pre, err := binary.ReadUvarint(r)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrBadPrefix, err)
@@ -79,7 +79,7 @@ func (rs Registry) DecodeStream(r *bytes.Reader) (Varsig, error) {
 	return decodeFunc(r, vers, disc)
 }
 
-func (rs Registry) decodeVersAnddisc(r *bytes.Reader) (Version, Discriminator, error) {
+func (rs Registry) decodeVersAnddisc(r BytesReader) (Version, Discriminator, error) {
 	vers, err := binary.ReadUvarint(r)
 	if err != nil {
 		return Version(vers), 0, err
@@ -98,6 +98,6 @@ func (rs Registry) decodeVersAnddisc(r *bytes.Reader) (Version, Discriminator, e
 	return Version(vers), Discriminator(disc), err
 }
 
-func notYetImplementedVarsigDecoder(_ *bytes.Reader, vers Version, disc Discriminator) (Varsig, error) {
+func notYetImplementedVarsigDecoder(_ BytesReader, vers Version, disc Discriminator) (Varsig, error) {
 	return nil, fmt.Errorf("%w: Version: %d, Discriminator: %x", ErrNotYetImplemented, vers, disc)
 }

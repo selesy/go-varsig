@@ -13,7 +13,7 @@ var ErrMissingSignature = errors.New("missing signature expected in varsig v0")
 var ErrNotYetImplemented = errors.New("not yet implemented")
 
 // ErrUnexpectedSignaturePresent is returned when a signature is present
-// in  a varsig >= v1.
+// in a varsig >= v1.
 var ErrUnexpectedSignaturePresent = errors.New("unexpected signature present in varsig >= v1")
 
 // ErrUnexpectedSignatureSize is returned when the length of the decoded
@@ -21,7 +21,7 @@ var ErrUnexpectedSignaturePresent = errors.New("unexpected signature present in 
 // signing algorithm or sent via a Varsig field.
 var ErrUnexpectedSignatureSize = errors.New("unexpected signature size in varsig v0")
 
-// ErrUnknownHashAlgoritm is returned when an unexpected value is provided
+// ErrUnknownHashAlgorithm is returned when an unexpected value is provided
 // while decoding the hashing algorithm.
 var ErrUnknownHashAlgorithm = errors.New("unknown hash algorithm")
 
@@ -30,7 +30,7 @@ var ErrUnknownHashAlgorithm = errors.New("unknown hash algorithm")
 // for this field may vary based on the varsig version.
 var ErrUnsupportedPayloadEncoding = errors.New("unsupported payload encoding")
 
-// ErrUnknowndiscorith is returned when the Registry doesn't have a
+// ErrUnknownDiscriminator is returned when the Registry doesn't have a
 // parsing function for the decoded signing algorithm.
 var ErrUnknownDiscriminator = errors.New("unknown signing algorithm")
 
@@ -43,5 +43,5 @@ var ErrUnknownEdDSACurve = errors.New("unknown Edwards curve")
 var ErrUnsupportedVersion = errors.New("unsupported version")
 
 // ErrBadPrefix is returned when the prefix field contains a value other
-// than 0x34 (encoded as a uvarint).
+// than 0x34 (encoded as an uvarint).
 var ErrBadPrefix = errors.New("varsig prefix not found")

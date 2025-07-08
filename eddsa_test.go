@@ -35,7 +35,7 @@ func TestDecodeEd25519(t *testing.T) {
 			assert.Equal(t, varsig.PayloadEncodingDAGCBOR, v.PayloadEncoding())
 			assert.Len(t, v.Signature(), 64)
 
-			impl, ok := v.(*varsig.EdDSAVarsig)
+			impl, ok := v.(varsig.EdDSAVarsig)
 			require.True(t, ok)
 			assert.Equal(t, varsig.CurveEd25519, impl.Curve())
 			assert.Equal(t, varsig.HashAlgorithmSHA512, impl.HashAlgorithm())

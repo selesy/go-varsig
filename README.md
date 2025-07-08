@@ -2,12 +2,12 @@
 
 `go-varsig` implements the upcoming v1.0.0 release of the [`varsig` specification](https://github.com/ChainAgnostic/varsig/pull/18)
 with limited (and soon to be deprecated) support for the `varsig` < v1.0
-specification.  This is predominatly included to support the UCAN v1.0
+specification.  This is predominantly included to support the UCAN v1.0
 use-case.
 
 ## Usage
 
-Include the `go-varsig` library  by running the following command:
+Include the `go-varsig` library by running the following command:
 
 ```bash
 go get github.com/ucan-wg/go-varsig@latest
@@ -29,7 +29,7 @@ asdf install
 
 ### Checks
 
-This repository contains an set of pre-commit hooks that are run prior to
+This repository contains a set of pre-commit hooks that are run prior to
 each `git commit`.  You can also run these checks manually using the
 following command:
 

@@ -19,7 +19,6 @@
 package varsig
 
 import (
-	"bytes"
 	"encoding/binary"
 	"io"
 )
@@ -45,11 +44,11 @@ func Decode(data []byte) (Varsig, error) {
 
 // DecodeStream converts data read from the provided io.Reader into one
 // of the Varsig types provided by the DefaultRegistry.
-func DecodeStream(r *bytes.Reader) (Varsig, error) {
+func DecodeStream(r BytesReader) (Varsig, error) {
 	return DefaultRegistry().DecodeStream(r)
 }
 
-type varsig[T Varsig] struct {
+type varsig struct {
 	vers   Version
 	disc   Discriminator
 	payEnc PayloadEncoding
@@ -57,30 +56,30 @@ type varsig[T Varsig] struct {
 }
 
 // Version returns the varsig's version field.
-func (v varsig[_]) Version() Version {
+func (v varsig) Version() Version {
 	return v.vers
 }
 
-// Discriminator returns the algorithm used to produce corresponding
+// Discriminator returns the algorithm used to produce the corresponding
 // signature.
-func (v varsig[_]) Discriminator() Discriminator {
+func (v varsig) Discriminator() Discriminator {
 	return v.disc
 }
 
 // PayloadEncoding returns the codec that was used to encode the signed
 // data.
-func (v varsig[_]) PayloadEncoding() PayloadEncoding {
+func (v varsig) PayloadEncoding() PayloadEncoding {
 	return v.payEnc
 }
 
 // Signature returns the cryptographic signature of the signed data. This
 // value is never present in a varsig >= v1 and must either be a valid
 // signature with the correct length or empty in varsig < v1.
-func (v varsig[_]) Signature() []byte {
+func (v varsig) Signature() []byte {
 	return v.sig
 }
 
-func (v *varsig[_]) encode() []byte {
+func (v varsig) encode() []byte {
 	var buf []byte
 
 	buf = binary.AppendUvarint(buf, Prefix)
@@ -94,37 +93,40 @@ func (v *varsig[_]) encode() []byte {
 	return buf
 }
 
-func (v *varsig[T]) decodePayEncAndSig(r *bytes.Reader, varsig *T, expectedLength uint64) (*T, error) {
+func (v varsig) decodePayEncAndSig(r BytesReader) (PayloadEncoding, []byte, error) {
 	payEnc, err := DecodePayloadEncoding(r, v.Version())
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
-	v.payEnc = payEnc
-
-	signature, err := io.ReadAll(r)
-	if err != nil {
-		return nil, err
+	var signature []byte
+	if v.Version() == Version0 {
+		signature, err = io.ReadAll(r)
+		if err != nil {
+			return 0, nil, err
+		}
 	}
 
-	v.sig = signature
-
-	return v.validateSig(varsig, expectedLength)
+	return payEnc, signature, nil
 }
 
-func (v *varsig[T]) validateSig(varsig *T, expectedLength uint64) (*T, error) {
+func (v varsig) validateSig(expectedLength uint64) error {
 	if v.Version() == Version0 && len(v.sig) == 0 {
-		return varsig, ErrMissingSignature
+		return ErrMissingSignature
 	}
 
 	if v.Version() == Version0 && uint64(len(v.sig)) != expectedLength {
-		return nil, ErrUnexpectedSignatureSize
+		return ErrUnexpectedSignatureSize
 	}
 
 	if v.Version() == Version1 && len(v.sig) != 0 {
-		return nil, ErrUnexpectedSignaturePresent
+		return ErrUnexpectedSignaturePresent
 	}
 
-	return varsig, nil
+	return nil
+}
 
+type BytesReader interface {
+	io.ByteReader
+	io.Reader
 }

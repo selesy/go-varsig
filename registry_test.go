@@ -61,7 +61,7 @@ func testRegistry(t *testing.T) varsig.Registry {
 func testDecodeFunc(t *testing.T) varsig.DecodeFunc {
 	t.Helper()
 
-	return func(r *bytes.Reader, vers varsig.Version, disc varsig.Discriminator) (varsig.Varsig, error) {
+	return func(r varsig.BytesReader, vers varsig.Version, disc varsig.Discriminator) (varsig.Varsig, error) {
 		v := &testVarsig{
 			vers: vers,
 			disc: disc,
@@ -71,7 +71,7 @@ func testDecodeFunc(t *testing.T) varsig.DecodeFunc {
 	}
 }
 
-var _ varsig.Varsig = (*testVarsig)(nil)
+var _ varsig.Varsig = testVarsig{}
 
 type testVarsig struct {
 	vers   varsig.Version
@@ -80,22 +80,22 @@ type testVarsig struct {
 	sig    []byte
 }
 
-func (v *testVarsig) Version() varsig.Version {
+func (v testVarsig) Version() varsig.Version {
 	return v.vers
 }
 
-func (v *testVarsig) Discriminator() varsig.Discriminator {
+func (v testVarsig) Discriminator() varsig.Discriminator {
 	return v.disc
 }
 
-func (v *testVarsig) PayloadEncoding() varsig.PayloadEncoding {
+func (v testVarsig) PayloadEncoding() varsig.PayloadEncoding {
 	return v.payEnc
 }
 
-func (v *testVarsig) Signature() []byte {
+func (v testVarsig) Signature() []byte {
 	return v.sig
 }
 
-func (v *testVarsig) Encode() []byte {
+func (v testVarsig) Encode() []byte {
 	return nil
 }

@@ -26,7 +26,7 @@ func TestRSAVarsig(t *testing.T) {
 		vs, err := varsig.Decode(example)
 		require.NoError(t, err)
 
-		rsaVs, ok := vs.(*varsig.RSAVarsig)
+		rsaVs, ok := vs.(varsig.RSAVarsig)
 		require.True(t, ok)
 
 		assert.Equal(t, varsig.Version1, rsaVs.Version())
