@@ -69,7 +69,7 @@ func TestUCANExample(t *testing.T) {
 		vs, err := varsig.Decode(example)
 		require.ErrorIs(t, err, varsig.ErrMissingSignature)
 
-		rsaVs, ok := vs.(*varsig.RSAVarsig)
+		rsaVs, ok := vs.(varsig.RSAVarsig)
 		require.True(t, ok)
 
 		assert.Equal(t, varsig.Version0, rsaVs.Version())

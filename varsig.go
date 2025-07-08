@@ -20,6 +20,7 @@ package varsig
 
 import (
 	"encoding/binary"
+	"errors"
 	"io"
 )
 
@@ -100,30 +101,40 @@ func (v varsig) decodePayEncAndSig(r BytesReader) (PayloadEncoding, []byte, erro
 	}
 
 	var signature []byte
-	if v.Version() == Version0 {
+	switch v.Version() {
+	case Version0:
 		signature, err = io.ReadAll(r)
 		if err != nil {
 			return 0, nil, err
 		}
+	case Version1:
+		_, err := r.ReadByte()
+		if err != nil && !errors.Is(err, io.EOF) {
+			return 0, nil, err
+		}
+		if err == nil {
+			return 0, nil, ErrUnexpectedSignaturePresent
+		}
+
 	}
 
 	return payEnc, signature, nil
 }
 
-func (v varsig) validateSig(expectedLength uint64) error {
-	if v.Version() == Version0 && len(v.sig) == 0 {
-		return ErrMissingSignature
+func validateSig[T Varsig](v T, expectedLength uint64) (T, error) {
+	if v.Version() == Version0 && len(v.Signature()) == 0 {
+		return v, ErrMissingSignature
 	}
 
-	if v.Version() == Version0 && uint64(len(v.sig)) != expectedLength {
-		return ErrUnexpectedSignatureSize
+	if v.Version() == Version0 && uint64(len(v.Signature())) != expectedLength {
+		return *new(T), ErrUnexpectedSignatureSize
 	}
 
-	if v.Version() == Version1 && len(v.sig) != 0 {
-		return ErrUnexpectedSignaturePresent
+	if v.Version() == Version1 && len(v.Signature()) != 0 {
+		return *new(T), ErrUnexpectedSignaturePresent
 	}
 
-	return nil
+	return v, nil
 }
 
 type BytesReader interface {

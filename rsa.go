@@ -45,12 +45,7 @@ func NewRSAVarsig(hashAlgorithm HashAlgorithm, keyLength uint64, payloadEncoding
 		sigLen:  keyLength,
 	}
 
-	err := v.validateSig(v.sigLen)
-	if err != nil {
-		return RSAVarsig{}, err
-	}
-
-	return v, nil
+	return validateSig(v, v.sigLen)
 }
 
 // Encode returns the encoded byte format of the RSAVarsig.
@@ -100,10 +95,5 @@ func decodeRSA(r BytesReader, vers Version, disc Discriminator) (Varsig, error) 
 		return nil, err
 	}
 
-	err = vs.validateSig(vs.sigLen)
-	if err != nil {
-		return RSAVarsig{}, err
-	}
-
-	return vs, nil
+	return validateSig(vs, vs.sigLen)
 }
