@@ -12,7 +12,7 @@ import (
 const Prefix = uint64(multicodec.Varsig)
 
 // HashAlgorithm is the multicodec.Code that specifies the hash algorithm
-// that's used to reduced the signed content
+// that's used to reduce the signed content
 type HashAlgorithm uint64
 
 // Constant multicodec.Code values that allow Varsig implementations to
@@ -36,16 +36,15 @@ func DecodeHashAlgorithm(r *bytes.Reader) (HashAlgorithm, error) {
 
 	h := HashAlgorithm(u)
 
-	if _, ok := map[HashAlgorithm]struct{}{
-		HashAlgorithmSHA256:   {},
-		HashAlgorithmSHA384:   {},
-		HashAlgorithmSHA512:   {},
-		HashAlgorithmShake256: {},
-	}[h]; !ok {
+	switch h {
+	case HashAlgorithmSHA256,
+		HashAlgorithmSHA384,
+		HashAlgorithmSHA512,
+		HashAlgorithmShake256:
+		return h, nil
+	default:
 		return HashAlgorithmUnspecified, fmt.Errorf("%w: %x", ErrUnknownHashAlgorithm, h)
 	}
-
-	return h, nil
 }
 
 // PayloadEncoding specifies the encoding of the data being (hashed and)
@@ -88,32 +87,30 @@ func DecodePayloadEncoding(r *bytes.Reader, vers Version) (PayloadEncoding, erro
 
 // https://github.com/ChainAgnostic/varsig#4-payload-encoding
 func decodeEncodingInfoV0(payEnc PayloadEncoding) (PayloadEncoding, error) {
-	if _, ok := map[PayloadEncoding]struct{}{
-		PayloadEncodingVerbatim: {},
-		PayloadEncodingDAGPB:    {},
-		PayloadEncodingDAGCBOR:  {},
-		PayloadEncodingDAGJSON:  {},
-		PayloadEncodingJWT:      {},
-		PayloadEncodingEIP191:   {},
-	}[payEnc]; !ok {
+	switch payEnc {
+	case PayloadEncodingVerbatim,
+		PayloadEncodingDAGPB,
+		PayloadEncodingDAGCBOR,
+		PayloadEncodingDAGJSON,
+		PayloadEncodingJWT,
+		PayloadEncodingEIP191:
+		return payEnc, nil
+	default:
 		return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x", ErrUnsupportedPayloadEncoding, Version0, payEnc)
 	}
-
-	return payEnc, nil
 }
 
 // https://github.com/expede/varsig/blob/main/README.md#payload-encoding
 func decodeEncodingInfoV1(payEnc PayloadEncoding) (PayloadEncoding, error) {
-	if _, ok := map[PayloadEncoding]struct{}{
-		PayloadEncodingVerbatim: {},
-		PayloadEncodingDAGCBOR:  {},
-		PayloadEncodingDAGJSON:  {},
-		PayloadEncodingEIP191:   {},
-	}[payEnc]; !ok {
+	switch payEnc {
+	case PayloadEncodingVerbatim,
+		PayloadEncodingDAGCBOR,
+		PayloadEncodingDAGJSON,
+		PayloadEncodingEIP191:
+		return payEnc, nil
+	default:
 		return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x", ErrUnsupportedPayloadEncoding, Version1, payEnc)
 	}
-
-	return payEnc, nil
 }
 
 // Discriminator is (usually) the multicodec.Code representing the public

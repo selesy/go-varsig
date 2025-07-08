@@ -39,6 +39,14 @@ func TestDecodeHashAlgorithm(t *testing.T) {
 	})
 }
 
+func BenchmarkDecodeHashAlgorithm(b *testing.B) {
+	b.ReportAllocs()
+	data := []byte{0x12}
+	for i := 0; i < b.N; i++ {
+		_, _ = varsig.DecodeHashAlgorithm(bytes.NewReader(data))
+	}
+}
+
 func TestDecodePayloadEncoding(t *testing.T) {
 	t.Parallel()
 
@@ -104,4 +112,12 @@ func TestDecodePayloadEncoding(t *testing.T) {
 			})
 		}
 	})
+}
+
+func BenchmarkDecodePayloadEncoding(b *testing.B) {
+	b.ReportAllocs()
+	data := []byte{0x5f}
+	for i := 0; i < b.N; i++ {
+		_, _ = varsig.DecodePayloadEncoding(bytes.NewReader(data), varsig.Version1)
+	}
 }
