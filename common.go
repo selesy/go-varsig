@@ -3,7 +3,7 @@ package varsig
 // Ed25519 produces a varsig that describes the associated algorithm defined
 // by the [IANA JOSE specification].
 //
-// [IANA JOSE specidication]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
+// [IANA JOSE specification]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
 func Ed25519(payloadEncoding PayloadEncoding, opts ...Option) (*EdDSAVarsig, error) {
 	return NewEdDSAVarsig(CurveEd25519, HashAlgorithmSHA512, payloadEncoding, opts...)
 }
@@ -11,7 +11,7 @@ func Ed25519(payloadEncoding PayloadEncoding, opts ...Option) (*EdDSAVarsig, err
 // Ed448 produces a varsig that describes the associated algorithm defined
 // by the [IANA JOSE specification].
 //
-// [IANA JOSE specidication]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
+// [IANA JOSE specification]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
 func Ed448(payloadEncoding PayloadEncoding, opts ...Option) (*EdDSAVarsig, error) {
 	return NewEdDSAVarsig(CurveEd448, HashAlgorithmShake256, payloadEncoding, opts...)
 }
@@ -19,7 +19,7 @@ func Ed448(payloadEncoding PayloadEncoding, opts ...Option) (*EdDSAVarsig, error
 // RS256 produces a varsig that describes the associated algorithm defined
 // by the [IANA JOSE specification].
 //
-// [IANA JOSE specidication]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
+// [IANA JOSE specification]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
 func RS256(keyLength uint64, payloadEncoding PayloadEncoding, opts ...Option) (*RSAVarsig, error) {
 	return NewRSAVarsig(HashAlgorithmSHA256, keyLength, payloadEncoding, opts...)
 }
@@ -27,7 +27,7 @@ func RS256(keyLength uint64, payloadEncoding PayloadEncoding, opts ...Option) (*
 // RS384 produces a varsig that describes the associated algorithm defined
 // by the [IANA JOSE specification].
 //
-// [IANA JOSE specidication]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
+// [IANA JOSE specification]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
 func RS384(keyLength uint64, payloadEncoding PayloadEncoding, opts ...Option) (*RSAVarsig, error) {
 	return NewRSAVarsig(HashAlgorithmSHA384, keyLength, payloadEncoding, opts...)
 }
@@ -35,7 +35,7 @@ func RS384(keyLength uint64, payloadEncoding PayloadEncoding, opts ...Option) (*
 // RS512 produces a varsig that describes the associated algorithm defined
 // by the [IANA JOSE specification].
 //
-// [IANA JOSE specidication]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
+// [IANA JOSE specification]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
 func RS512(keyLength uint64, payloadEncoding PayloadEncoding, opts ...Option) (*RSAVarsig, error) {
 	return NewRSAVarsig(HashAlgorithmSHA512, keyLength, payloadEncoding, opts...)
 }

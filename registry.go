@@ -6,8 +6,11 @@ import (
 	"fmt"
 )
 
+// Version represents which version of the vasig specification was used
+// to produce Varsig value.
 type Version uint64
 
+// Constancts for the existing varsig specifications
 const (
 	Version0 Version = 0
 	Version1 Version = 1
@@ -15,22 +18,22 @@ const (
 
 // DecodeFunc is a function that parses the varsig representing a specific
 // signing algorithm.
-type DecodeFunc func(*bytes.Reader, Version, SignAlgorithm) (Varsig, error)
+type DecodeFunc func(*bytes.Reader, Version, Discriminator) (Varsig, error)
 
 // Registry contains a mapping between known signing algorithms, and
 // functions that can parse varsigs for that signing algorithm.
-type Registry map[SignAlgorithm]DecodeFunc
+type Registry map[Discriminator]DecodeFunc
 
 // DefaultRegistry provides a Registry containing the mappings for the
 // signing algorithms which have an implementation within this library.
 func DefaultRegistry() Registry {
-	return map[SignAlgorithm]DecodeFunc{
-		SignAlgorithmRSA:            decodeRSA,
-		SignAlgorithmEdDSA:          decodeEd25519,
-		SignAlgorithmEd448:          decodeEd25519,
-		SignAlgorithmECDSAP256:      notYetImplementedVarsigDecoder,
-		SignAlgorithmECDSASecp256k1: notYetImplementedVarsigDecoder,
-		SignAlgorithmECDSAP521:      notYetImplementedVarsigDecoder,
+	return map[Discriminator]DecodeFunc{
+		DiscriminatorRSA:            decodeRSA,
+		DiscriminatorEdDSA:          decodeEd25519,
+		DiscriminatorEd448:          decodeEd25519,
+		DiscriminatorECDSAP256:      notYetImplementedVarsigDecoder,
+		DiscriminatorECDSASecp256k1: notYetImplementedVarsigDecoder,
+		DiscriminatorECDSAP521:      notYetImplementedVarsigDecoder,
 	}
 }
 
@@ -41,7 +44,7 @@ func NewRegistry() Registry {
 
 // Register allows new mappings between a signing algorithm and its parsing
 // function to the Registry.
-func (rs Registry) Register(alg SignAlgorithm, decodeFunc DecodeFunc) {
+func (rs Registry) Register(alg Discriminator, decodeFunc DecodeFunc) {
 	rs[alg] = decodeFunc
 }
 
@@ -63,20 +66,20 @@ func (rs Registry) DecodeStream(r *bytes.Reader) (Varsig, error) {
 		return nil, fmt.Errorf("%w: expected %d, got %d", ErrBadPrefix, Prefix, pre)
 	}
 
-	vers, signAlg, err := rs.decodeVersAndSignAlg(r)
+	vers, disc, err := rs.decodeVersAnddisc(r)
 	if err != nil {
 		return nil, err
 	}
 
-	decodeFunc, ok := rs[SignAlgorithm(signAlg)]
+	decodeFunc, ok := rs[Discriminator(disc)]
 	if !ok {
-		return nil, fmt.Errorf("%w: %x", ErrUnknownSignAlgorithm, signAlg)
+		return nil, fmt.Errorf("%w: %x", ErrUnknownDiscriminator, disc)
 	}
 
-	return decodeFunc(r, vers, signAlg)
+	return decodeFunc(r, vers, disc)
 }
 
-func (rs Registry) decodeVersAndSignAlg(r *bytes.Reader) (Version, SignAlgorithm, error) {
+func (rs Registry) decodeVersAnddisc(r *bytes.Reader) (Version, Discriminator, error) {
 	vers, err := binary.ReadUvarint(r)
 	if err != nil {
 		return Version(vers), 0, err
@@ -87,14 +90,14 @@ func (rs Registry) decodeVersAndSignAlg(r *bytes.Reader) (Version, SignAlgorithm
 	}
 
 	if vers >= 64 {
-		return 0, SignAlgorithm(vers), nil
+		return 0, Discriminator(vers), nil
 	}
 
-	signAlg, err := binary.ReadUvarint(r)
+	disc, err := binary.ReadUvarint(r)
 
-	return Version(vers), SignAlgorithm(signAlg), err
+	return Version(vers), Discriminator(disc), err
 }
 
-func notYetImplementedVarsigDecoder(_ *bytes.Reader, vers Version, signAlg SignAlgorithm) (Varsig, error) {
-	return nil, fmt.Errorf("%w: Version: %d, SignAlgorithm: %x", ErrNotYetImplemented, vers, signAlg)
+func notYetImplementedVarsigDecoder(_ *bytes.Reader, vers Version, disc Discriminator) (Varsig, error) {
+	return nil, fmt.Errorf("%w: Version: %d, Discriminator: %x", ErrNotYetImplemented, vers, disc)
 }

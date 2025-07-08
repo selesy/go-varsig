@@ -25,7 +25,7 @@ func TestRegistry_Decode(t *testing.T) {
 		vs, err := reg.DecodeStream(bytes.NewReader(data))
 		require.NoError(t, err)
 		assert.Equal(t, varsig.Version0, vs.Version())
-		assert.Equal(t, testSignAlgorithm1, vs.SignatureAlgorithm())
+		assert.Equal(t, testDiscriminator1, vs.Discriminator())
 	})
 
 	t.Run("passes - v1", func(t *testing.T) {
@@ -39,21 +39,21 @@ func TestRegistry_Decode(t *testing.T) {
 		vs, err := reg.DecodeStream(bytes.NewReader(data))
 		require.NoError(t, err)
 		assert.Equal(t, varsig.Version1, vs.Version())
-		assert.Equal(t, testSignAlgorithm1, vs.SignatureAlgorithm())
+		assert.Equal(t, testDiscriminator1, vs.Discriminator())
 	})
 }
 
 const (
-	testSignAlgorithm0 varsig.SignAlgorithm = 0x1000
-	testSignAlgorithm1 varsig.SignAlgorithm = 0x1001
+	testDiscriminator0 varsig.Discriminator = 0x1000
+	testDiscriminator1 varsig.Discriminator = 0x1001
 )
 
 func testRegistry(t *testing.T) varsig.Registry {
 	t.Helper()
 
 	reg := varsig.NewRegistry()
-	reg.Register(testSignAlgorithm0, testDecodeFunc(t))
-	reg.Register(testSignAlgorithm1, testDecodeFunc(t))
+	reg.Register(testDiscriminator0, testDecodeFunc(t))
+	reg.Register(testDiscriminator1, testDecodeFunc(t))
 
 	return reg
 }
@@ -61,10 +61,10 @@ func testRegistry(t *testing.T) varsig.Registry {
 func testDecodeFunc(t *testing.T) varsig.DecodeFunc {
 	t.Helper()
 
-	return func(r *bytes.Reader, vers varsig.Version, signAlg varsig.SignAlgorithm) (varsig.Varsig, error) {
+	return func(r *bytes.Reader, vers varsig.Version, disc varsig.Discriminator) (varsig.Varsig, error) {
 		v := &testVarsig{
-			vers:    vers,
-			signAlg: signAlg,
+			vers: vers,
+			disc: disc,
 		}
 
 		return v, nil
@@ -74,18 +74,18 @@ func testDecodeFunc(t *testing.T) varsig.DecodeFunc {
 var _ varsig.Varsig = (*testVarsig)(nil)
 
 type testVarsig struct {
-	vers    varsig.Version
-	signAlg varsig.SignAlgorithm
-	payEnc  varsig.PayloadEncoding
-	sig     []byte
+	vers   varsig.Version
+	disc   varsig.Discriminator
+	payEnc varsig.PayloadEncoding
+	sig    []byte
 }
 
 func (v *testVarsig) Version() varsig.Version {
 	return v.vers
 }
 
-func (v *testVarsig) SignatureAlgorithm() varsig.SignAlgorithm {
-	return v.signAlg
+func (v *testVarsig) Discriminator() varsig.Discriminator {
+	return v.disc
 }
 
 func (v *testVarsig) PayloadEncoding() varsig.PayloadEncoding {

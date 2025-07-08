@@ -30,7 +30,7 @@ func TestRSAVarsig(t *testing.T) {
 		require.True(t, ok)
 
 		assert.Equal(t, varsig.Version1, rsaVs.Version())
-		assert.Equal(t, varsig.SignAlgorithmRSA, rsaVs.SignatureAlgorithm())
+		assert.Equal(t, varsig.DiscriminatorRSA, rsaVs.Discriminator())
 		assert.Equal(t, varsig.HashAlgorithmSHA256, rsaVs.HashAlgorithm())
 		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, rsaVs.PayloadEncoding())
 		assert.Equal(t, uint64(keyLen), rsaVs.KeyLength())
@@ -73,7 +73,7 @@ func TestUCANExample(t *testing.T) {
 		require.True(t, ok)
 
 		assert.Equal(t, varsig.Version0, rsaVs.Version())
-		assert.Equal(t, varsig.SignAlgorithmRSA, rsaVs.SignatureAlgorithm())
+		assert.Equal(t, varsig.DiscriminatorRSA, rsaVs.Discriminator())
 		assert.Equal(t, varsig.HashAlgorithmSHA256, rsaVs.HashAlgorithm())
 		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, rsaVs.PayloadEncoding())
 		assert.Equal(t, uint64(keyLen), rsaVs.KeyLength())

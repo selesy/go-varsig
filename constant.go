@@ -8,10 +8,16 @@ import (
 	"github.com/multiformats/go-multicodec"
 )
 
+// Prefix is the multicodec.Code for the varsig's varuint prefix byte.
+const Prefix = uint64(multicodec.Varsig)
+
 // HashAlgorithm is the multicodec.Code that specifies the hash algorithm
 // that's used to reduced the signed content
 type HashAlgorithm uint64
 
+// Constant multicodec.Code values that allow Varsig implementations to
+// specify how the payload content is hashed before the signature is
+// generated.
 const (
 	HashAlgorithmUnspecified HashAlgorithm = 0x00
 	HashAlgorithmSHA256                    = HashAlgorithm(multicodec.Sha2_256)
@@ -48,6 +54,9 @@ func DecodeHashAlgorithm(r *bytes.Reader) (HashAlgorithm, error) {
 // consistent hashes and signatures.
 type PayloadEncoding uint64
 
+// Constant multicodec.Code values that allow Varsig implementations to
+// specify how the payload content is encoded before being hashed.  In
+// varsig >= v1, only canonical encoding is allowed.
 const (
 	PayloadEncodingUnspecified PayloadEncoding = 0x00
 	PayloadEncodingVerbatim    PayloadEncoding = 0x5f
@@ -108,14 +117,14 @@ func decodeEncodingInfoV1(payEnc PayloadEncoding) (PayloadEncoding, error) {
 	return payEnc, nil
 }
 
-// SignAlgorithm is (usually) the multicodec.Code representing the public
+// Discriminator is (usually) the multicodec.Code representing the public
 // key type of the algorithm used to create the signature.
 //
 // There is not set list of constants here, nor is there a decode function
 // as the author of an implementation should include the constant with the
 // implementation, and the decoding is handled by the Handler, which uses
-// the SignAlgorithm to choose the correct implementation.  Also note that
-// some of the SignAlgorithm values for a specific implementation have
+// the Discriminator to choose the correct implementation.  Also note that
+// some of the Discriminator values for a specific implementation have
 // changed between varsig v0 and v1, so it's possible to have more than one
 // constant defined per implementation.
-type SignAlgorithm uint64
+type Discriminator uint64

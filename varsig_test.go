@@ -66,7 +66,7 @@ func TestDecode(t *testing.T) {
 		require.NoError(t, err)
 
 		vs, err := varsig.Decode(data)
-		require.ErrorIs(t, err, varsig.ErrUnknownSignAlgorithm)
+		require.ErrorIs(t, err, varsig.ErrUnknownDiscriminator)
 		assert.Nil(t, vs)
 	})
 
@@ -77,7 +77,7 @@ func TestDecode(t *testing.T) {
 		require.NoError(t, err)
 
 		vs, err := varsig.Decode(data)
-		require.ErrorIs(t, err, varsig.ErrUnknownSignAlgorithm)
+		require.ErrorIs(t, err, varsig.ErrUnknownDiscriminator)
 		assert.Nil(t, vs)
 	})
 
@@ -180,7 +180,7 @@ func roundTrip[T varsig.Varsig](t *testing.T, in T, expEncHex string) T {
 	}
 
 	assert.Equal(t, in.Version(), out.Version())
-	assert.Equal(t, in.SignatureAlgorithm(), out.SignatureAlgorithm())
+	assert.Equal(t, in.Discriminator(), out.Discriminator())
 	assert.Equal(t, in.PayloadEncoding(), out.PayloadEncoding())
 	assert.Equal(t, in.Signature(), out.Signature())
 

@@ -23,19 +23,14 @@ import (
 	"bytes"
 	"encoding/binary"
 	"io"
-
-	"github.com/multiformats/go-multicodec"
 )
-
-// Prefix is the multicodec.Code for the varsig's varuint prefix byte.
-const Prefix = uint64(multicodec.Varsig)
 
 // Varsig represents types that describe how a signature was generated
 // and thus how to interpret the signature and verify the signed data.
 type Varsig interface {
 	// accessors for fields that are common to all varsig
 	Version() Version
-	SignatureAlgorithm() SignAlgorithm
+	Discriminator() Discriminator
 	PayloadEncoding() PayloadEncoding
 	Signature() []byte
 
@@ -56,10 +51,10 @@ func DecodeStream(r *bytes.Reader) (Varsig, error) {
 }
 
 type varsig[T Varsig] struct {
-	vers    Version
-	signAlg SignAlgorithm
-	payEnc  PayloadEncoding
-	sig     []byte
+	vers   Version
+	disc   Discriminator
+	payEnc PayloadEncoding
+	sig    []byte
 }
 
 // Version returns the varsig's version field.
@@ -67,10 +62,10 @@ func (v varsig[_]) Version() Version {
 	return v.vers
 }
 
-// SignatureAlgorithm returns the algorithm used to produce corresponding
+// Discriminator returns the algorithm used to produce corresponding
 // signature.
-func (v varsig[_]) SignatureAlgorithm() SignAlgorithm {
-	return v.signAlg
+func (v varsig[_]) Discriminator() Discriminator {
+	return v.disc
 }
 
 // PayloadEncoding returns the codec that was used to encode the signed
@@ -95,7 +90,7 @@ func (v *varsig[_]) encode() []byte {
 		buf = binary.AppendUvarint(buf, uint64(Version1))
 	}
 
-	buf = binary.AppendUvarint(buf, uint64(v.signAlg))
+	buf = binary.AppendUvarint(buf, uint64(v.disc))
 
 	return buf
 }

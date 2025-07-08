@@ -30,9 +30,9 @@ var ErrUnknownHashAlgorithm = errors.New("unknown hash algorithm")
 // for this field may vary based on the varsig version.
 var ErrUnsupportedPayloadEncoding = errors.New("unsupported payload encoding")
 
-// ErrUnknownSignAlgorith is returned when the Registry doesn't have a
+// ErrUnknowndiscorith is returned when the Registry doesn't have a
 // parsing function for the decoded signing algorithm.
-var ErrUnknownSignAlgorithm = errors.New("unknown signing algorithm")
+var ErrUnknownDiscriminator = errors.New("unknown signing algorithm")
 
 // ErrUnsupportedVersion is returned when an unsupported varsig version
 // field is present.

@@ -7,12 +7,13 @@ import (
 	"github.com/multiformats/go-multicodec"
 )
 
-const SignAlgorithmRSA = SignAlgorithm(multicodec.RsaPub)
+// DiscriminatorRSA is the multicodec.Code specifying an RSA signature.
+const DiscriminatorRSA = Discriminator(multicodec.RsaPub)
 
 var _ Varsig = (*RSAVarsig)(nil)
 
 // RSAVarsig is a varsig that encodes the parameters required to describe
-// and RSA signature.
+// an RSA signature.
 type RSAVarsig struct {
 	varsig[RSAVarsig]
 	hashAlg HashAlgorithm
@@ -20,7 +21,7 @@ type RSAVarsig struct {
 }
 
 // NewRSAVarsig creates and validates an RSA varsig with the provided
-// parameters.
+// hash algorithm, key length and payload encoding.
 func NewRSAVarsig(hashAlgorithm HashAlgorithm, keyLength uint64, payloadEncoding PayloadEncoding, opts ...Option) (*RSAVarsig, error) {
 	options := newOptions(opts...)
 
@@ -36,10 +37,10 @@ func NewRSAVarsig(hashAlgorithm HashAlgorithm, keyLength uint64, payloadEncoding
 
 	v := &RSAVarsig{
 		varsig: varsig[RSAVarsig]{
-			vers:    vers,
-			signAlg: SignAlgorithmRSA,
-			payEnc:  payloadEncoding,
-			sig:     sig,
+			vers:   vers,
+			disc:   DiscriminatorRSA,
+			payEnc: payloadEncoding,
+			sig:    sig,
 		},
 		hashAlg: hashAlgorithm,
 		sigLen:  keyLength,
@@ -48,7 +49,7 @@ func NewRSAVarsig(hashAlgorithm HashAlgorithm, keyLength uint64, payloadEncoding
 	return v.validateSig(v, v.sigLen)
 }
 
-// Encode returns the encoded byte formation of the RSAVarsig.
+// Encode returns the encoded byte format of the RSAVarsig.
 func (v RSAVarsig) Encode() []byte {
 	buf := v.encode()
 	buf = binary.AppendUvarint(buf, uint64(v.hashAlg))
@@ -70,7 +71,7 @@ func (v *RSAVarsig) KeyLength() uint64 {
 	return v.sigLen
 }
 
-func decodeRSA(r *bytes.Reader, vers Version, signAlg SignAlgorithm) (Varsig, error) {
+func decodeRSA(r *bytes.Reader, vers Version, disc Discriminator) (Varsig, error) {
 	hashAlg, err := DecodeHashAlgorithm(r)
 	if err != nil {
 		return nil, err
@@ -83,8 +84,8 @@ func decodeRSA(r *bytes.Reader, vers Version, signAlg SignAlgorithm) (Varsig, er
 
 	vs := &RSAVarsig{
 		varsig: varsig[RSAVarsig]{
-			vers:    vers,
-			signAlg: signAlg,
+			vers: vers,
+			disc: disc,
 		},
 		hashAlg: HashAlgorithm(hashAlg),
 		sigLen:  sigLen,
