@@ -37,11 +37,10 @@ func DecodeHashAlgorithm(r *bytes.Reader) (HashAlgorithm, error) {
 	h := HashAlgorithm(u)
 
 	if _, ok := map[HashAlgorithm]struct{}{
-		HashAlgorithmUnspecified: {},
-		HashAlgorithmSHA256:      {},
-		HashAlgorithmSHA384:      {},
-		HashAlgorithmSHA512:      {},
-		HashAlgorithmShake256:    {},
+		HashAlgorithmSHA256:   {},
+		HashAlgorithmSHA384:   {},
+		HashAlgorithmSHA512:   {},
+		HashAlgorithmShake256: {},
 	}[h]; !ok {
 		return HashAlgorithmUnspecified, fmt.Errorf("%w: %x", ErrUnknownHashAlgorithm, h)
 	}
