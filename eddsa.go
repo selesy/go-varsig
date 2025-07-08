@@ -79,11 +79,7 @@ func NewEdDSAVarsig(curve EdDSACurve, hashAlgorithm HashAlgorithm, payloadEncodi
 		hashAlg: hashAlgorithm,
 	}
 
-	err := v.validateSig(ed25519.SignatureSize)
-	if err != nil {
-		return EdDSAVarsig{}, err
-	}
-	return v, nil
+	return validateSig(v, ed25519.SignatureSize)
 }
 
 // Curve returns the Edwards curve used to generate the EdDSA signature.
@@ -142,10 +138,5 @@ func decodeEd25519(r BytesReader, vers Version, disc Discriminator) (Varsig, err
 		return nil, err
 	}
 
-	err = v.validateSig(ed25519.SignatureSize)
-	if err != nil {
-		return RSAVarsig{}, err
-	}
-
-	return v, nil
+	return validateSig(v, ed25519.SignatureSize)
 }

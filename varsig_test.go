@@ -133,7 +133,7 @@ func TestDecode(t *testing.T) {
 
 		vs, err := varsig.Decode(data)
 		require.ErrorIs(t, err, varsig.ErrUnexpectedSignatureSize)
-		assert.Nil(t, vs)
+		assert.Zero(t, vs)
 	})
 
 	t.Run("fails - unexpected signature present - v1", func(t *testing.T) {
