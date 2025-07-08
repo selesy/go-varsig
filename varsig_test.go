@@ -158,15 +158,11 @@ func TestDecode(t *testing.T) {
 	})
 }
 
-func mustVarsig[T varsig.Varsig](t *testing.T) func(*T, error) *T {
+func mustVarsig[T varsig.Varsig](t *testing.T, v T, err error) {
 	t.Helper()
 
-	return func(v *T, err error) *T {
-		if err != nil && ((*v).Version() != varsig.Version0 || !errors.Is(err, varsig.ErrMissingSignature)) {
-			t.Error(err)
-		}
-
-		return v
+	if err != nil && (v.Version() != varsig.Version0 || !errors.Is(err, varsig.ErrMissingSignature)) {
+		t.Error(err)
 	}
 }
 

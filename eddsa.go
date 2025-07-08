@@ -1,7 +1,6 @@
 package varsig
 
 import (
-	"bytes"
 	"crypto/ed25519"
 	"encoding/binary"
 	"fmt"
@@ -27,7 +26,7 @@ const (
 	CurveEd448   = EdDSACurve(multicodec.Ed448Pub)
 )
 
-func decodeEdDSACurve(r *bytes.Reader) (EdDSACurve, error) {
+func decodeEdDSACurve(r BytesReader) (EdDSACurve, error) {
 	u, err := binary.ReadUvarint(r)
 	if err != nil {
 		return 0, err
@@ -41,12 +40,12 @@ func decodeEdDSACurve(r *bytes.Reader) (EdDSACurve, error) {
 	}
 }
 
-var _ Varsig = (*EdDSAVarsig)(nil)
+var _ Varsig = EdDSAVarsig{}
 
 // EdDSAVarsig is a varsig that encodes the parameters required to describe
 // an EdDSA signature.
 type EdDSAVarsig struct {
-	varsig[EdDSAVarsig]
+	varsig
 
 	curve   EdDSACurve
 	hashAlg HashAlgorithm
@@ -54,13 +53,13 @@ type EdDSAVarsig struct {
 
 // NewEdDSAVarsig creates and validates an EdDSA varsig with the provided
 // curve, hash algorithm and payload encoding.
-func NewEdDSAVarsig(curve EdDSACurve, hashAlgorithm HashAlgorithm, payloadEncoding PayloadEncoding, opts ...Option) (*EdDSAVarsig, error) {
+func NewEdDSAVarsig(curve EdDSACurve, hashAlgorithm HashAlgorithm, payloadEncoding PayloadEncoding, opts ...Option) (EdDSAVarsig, error) {
 	options := newOptions(opts...)
 
 	var (
 		vers = Version1
 		disc = DiscriminatorEdDSA
-		sig  = []byte{}
+		sig  []byte
 	)
 
 	if options.ForceVersion0() {
@@ -69,8 +68,8 @@ func NewEdDSAVarsig(curve EdDSACurve, hashAlgorithm HashAlgorithm, payloadEncodi
 		sig = options.Signature()
 	}
 
-	v := &EdDSAVarsig{
-		varsig: varsig[EdDSAVarsig]{
+	v := EdDSAVarsig{
+		varsig: varsig{
 			vers:   vers,
 			disc:   disc,
 			payEnc: payloadEncoding,
@@ -80,17 +79,21 @@ func NewEdDSAVarsig(curve EdDSACurve, hashAlgorithm HashAlgorithm, payloadEncodi
 		hashAlg: hashAlgorithm,
 	}
 
-	return v.validateSig(v, ed25519.PrivateKeySize)
+	err := v.validateSig(ed25519.SignatureSize)
+	if err != nil {
+		return EdDSAVarsig{}, err
+	}
+	return v, nil
 }
 
 // Curve returns the Edwards curve used to generate the EdDSA signature.
-func (v *EdDSAVarsig) Curve() EdDSACurve {
+func (v EdDSAVarsig) Curve() EdDSACurve {
 	return v.curve
 }
 
 // HashAlgorithm returns the multicodec.Code describing the hash algorithm
 // used to hash the payload content before the signature is generated.
-func (v *EdDSAVarsig) HashAlgorithm() HashAlgorithm {
+func (v EdDSAVarsig) HashAlgorithm() HashAlgorithm {
 	return v.hashAlg
 }
 
@@ -109,7 +112,7 @@ func (v EdDSAVarsig) Encode() []byte {
 	return buf
 }
 
-func decodeEd25519(r *bytes.Reader, vers Version, disc Discriminator) (Varsig, error) {
+func decodeEd25519(r BytesReader, vers Version, disc Discriminator) (Varsig, error) {
 	curve := EdDSACurve(disc)
 	if vers != Version0 {
 		var err error
@@ -125,8 +128,8 @@ func decodeEd25519(r *bytes.Reader, vers Version, disc Discriminator) (Varsig, e
 		return nil, err
 	}
 
-	v := &EdDSAVarsig{
-		varsig: varsig[EdDSAVarsig]{
+	v := EdDSAVarsig{
+		varsig: varsig{
 			vers: vers,
 			disc: disc,
 		},
@@ -134,5 +137,15 @@ func decodeEd25519(r *bytes.Reader, vers Version, disc Discriminator) (Varsig, e
 		hashAlg: hashAlg,
 	}
 
-	return v.decodePayEncAndSig(r, v, ed25519.PrivateKeySize)
+	v.payEnc, v.sig, err = v.decodePayEncAndSig(r)
+	if err != nil {
+		return nil, err
+	}
+
+	err = v.validateSig(ed25519.SignatureSize)
+	if err != nil {
+		return RSAVarsig{}, err
+	}
+
+	return v, nil
 }

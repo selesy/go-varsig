@@ -1,7 +1,6 @@
 package varsig
 
 import (
-	"bytes"
 	"encoding/binary"
 
 	"github.com/multiformats/go-multicodec"
@@ -10,24 +9,24 @@ import (
 // DiscriminatorRSA is the multicodec.Code specifying an RSA signature.
 const DiscriminatorRSA = Discriminator(multicodec.RsaPub)
 
-var _ Varsig = (*RSAVarsig)(nil)
+var _ Varsig = RSAVarsig{}
 
 // RSAVarsig is a varsig that encodes the parameters required to describe
 // an RSA signature.
 type RSAVarsig struct {
-	varsig[RSAVarsig]
+	varsig
 	hashAlg HashAlgorithm
 	sigLen  uint64
 }
 
 // NewRSAVarsig creates and validates an RSA varsig with the provided
 // hash algorithm, key length and payload encoding.
-func NewRSAVarsig(hashAlgorithm HashAlgorithm, keyLength uint64, payloadEncoding PayloadEncoding, opts ...Option) (*RSAVarsig, error) {
+func NewRSAVarsig(hashAlgorithm HashAlgorithm, keyLength uint64, payloadEncoding PayloadEncoding, opts ...Option) (RSAVarsig, error) {
 	options := newOptions(opts...)
 
 	var (
 		vers = Version1
-		sig  = []byte{}
+		sig  []byte
 	)
 
 	if options.ForceVersion0() {
@@ -35,8 +34,8 @@ func NewRSAVarsig(hashAlgorithm HashAlgorithm, keyLength uint64, payloadEncoding
 		sig = options.Signature()
 	}
 
-	v := &RSAVarsig{
-		varsig: varsig[RSAVarsig]{
+	v := RSAVarsig{
+		varsig: varsig{
 			vers:   vers,
 			disc:   DiscriminatorRSA,
 			payEnc: payloadEncoding,
@@ -46,7 +45,12 @@ func NewRSAVarsig(hashAlgorithm HashAlgorithm, keyLength uint64, payloadEncoding
 		sigLen:  keyLength,
 	}
 
-	return v.validateSig(v, v.sigLen)
+	err := v.validateSig(v.sigLen)
+	if err != nil {
+		return RSAVarsig{}, err
+	}
+
+	return v, nil
 }
 
 // Encode returns the encoded byte format of the RSAVarsig.
@@ -61,17 +65,17 @@ func (v RSAVarsig) Encode() []byte {
 }
 
 // HashAlgorithm returns the hash algorithm used to has the payload content.
-func (v *RSAVarsig) HashAlgorithm() HashAlgorithm {
+func (v RSAVarsig) HashAlgorithm() HashAlgorithm {
 	return v.hashAlg
 }
 
 // KeyLength returns the length of the RSA key used to sign the payload
 // content.
-func (v *RSAVarsig) KeyLength() uint64 {
+func (v RSAVarsig) KeyLength() uint64 {
 	return v.sigLen
 }
 
-func decodeRSA(r *bytes.Reader, vers Version, disc Discriminator) (Varsig, error) {
+func decodeRSA(r BytesReader, vers Version, disc Discriminator) (Varsig, error) {
 	hashAlg, err := DecodeHashAlgorithm(r)
 	if err != nil {
 		return nil, err
@@ -82,8 +86,8 @@ func decodeRSA(r *bytes.Reader, vers Version, disc Discriminator) (Varsig, error
 		return nil, err
 	}
 
-	vs := &RSAVarsig{
-		varsig: varsig[RSAVarsig]{
+	vs := RSAVarsig{
+		varsig: varsig{
 			vers: vers,
 			disc: disc,
 		},
@@ -91,5 +95,15 @@ func decodeRSA(r *bytes.Reader, vers Version, disc Discriminator) (Varsig, error
 		sigLen:  sigLen,
 	}
 
-	return vs.decodePayEncAndSig(r, vs, sigLen)
+	vs.payEnc, vs.sig, err = vs.decodePayEncAndSig(r)
+	if err != nil {
+		return nil, err
+	}
+
+	err = vs.validateSig(vs.sigLen)
+	if err != nil {
+		return RSAVarsig{}, err
+	}
+
+	return vs, nil
 }
