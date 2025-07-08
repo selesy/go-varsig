@@ -87,7 +87,7 @@ func decodeRSA(r *bytes.Reader, vers Version, disc Discriminator) (Varsig, error
 			vers: vers,
 			disc: disc,
 		},
-		hashAlg: HashAlgorithm(hashAlg),
+		hashAlg: hashAlg,
 		sigLen:  sigLen,
 	}
 

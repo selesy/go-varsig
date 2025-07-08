@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/ed25519"
 	"encoding/binary"
+	"fmt"
 
 	"github.com/multiformats/go-multicodec"
 )
@@ -25,6 +26,20 @@ const (
 	CurveEd25519 = EdDSACurve(multicodec.Ed25519Pub)
 	CurveEd448   = EdDSACurve(multicodec.Ed448Pub)
 )
+
+func decodeEdDSACurve(r *bytes.Reader) (EdDSACurve, error) {
+	u, err := binary.ReadUvarint(r)
+	if err != nil {
+		return 0, err
+	}
+
+	switch curve := EdDSACurve(u); curve {
+	case CurveEd25519, CurveEd448:
+		return curve, nil
+	default:
+		return 0, fmt.Errorf("%w: %x", ErrUnknownEdDSACurve, u)
+	}
+}
 
 var _ Varsig = (*EdDSAVarsig)(nil)
 
@@ -95,20 +110,19 @@ func (v EdDSAVarsig) Encode() []byte {
 }
 
 func decodeEd25519(r *bytes.Reader, vers Version, disc Discriminator) (Varsig, error) {
-	curve := uint64(disc)
+	curve := EdDSACurve(disc)
 	if vers != Version0 {
-		u, err := binary.ReadUvarint(r)
+		var err error
 
+		curve, err = decodeEdDSACurve(r)
 		if err != nil {
-			return nil, err // TODO: wrap error?
+			return nil, err
 		}
-
-		curve = u
 	}
 
-	hashAlg, err := binary.ReadUvarint(r)
+	hashAlg, err := DecodeHashAlgorithm(r)
 	if err != nil {
-		return nil, err // TODO: wrap error?
+		return nil, err
 	}
 
 	v := &EdDSAVarsig{
@@ -116,8 +130,8 @@ func decodeEd25519(r *bytes.Reader, vers Version, disc Discriminator) (Varsig, e
 			vers: vers,
 			disc: disc,
 		},
-		curve:   EdDSACurve(curve),
-		hashAlg: HashAlgorithm(hashAlg),
+		curve:   curve,
+		hashAlg: hashAlg,
 	}
 
 	return v.decodePayEncAndSig(r, v, ed25519.PrivateKeySize)

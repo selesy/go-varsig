@@ -34,6 +34,10 @@ var ErrUnsupportedPayloadEncoding = errors.New("unsupported payload encoding")
 // parsing function for the decoded signing algorithm.
 var ErrUnknownDiscriminator = errors.New("unknown signing algorithm")
 
+// ErrUnknownEdDSACurve is returned when the decoded uvarint isn't either
+// CurveEd25519 or CurveEd448.
+var ErrUnknownEdDSACurve = errors.New("unknown Edwards curve")
+
 // ErrUnsupportedVersion is returned when an unsupported varsig version
 // field is present.
 var ErrUnsupportedVersion = errors.New("unsupported version")
