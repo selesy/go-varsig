@@ -27,13 +27,21 @@ import (
 // Varsig represents types that describe how a signature was generated
 // and thus how to interpret the signature and verify the signed data.
 type Varsig interface {
-	// accessors for fields that are common to all varsig
+	// Version returns the varsig's version field.
 	Version() Version
+
+	// Discriminator returns the algorithm used to produce the corresponding signature.
 	Discriminator() Discriminator
+
+	// PayloadEncoding returns the codec that was used to encode the signed data.
 	PayloadEncoding() PayloadEncoding
+
+	// Signature returns the cryptographic signature of the signed data.
+	// This value is never present in a varsig >= v1 and must either be a valid
+	// signature with the correct length or empty in varsig < v1.
 	Signature() []byte
 
-	// Operations that are common to all varsig
+	// Encode returns the encoded byte format of the varsig.
 	Encode() []byte
 }
 
@@ -115,7 +123,6 @@ func (v varsig) decodePayEncAndSig(r BytesReader) (PayloadEncoding, []byte, erro
 		if err == nil {
 			return 0, nil, ErrUnexpectedSignaturePresent
 		}
-
 	}
 
 	return payEnc, signature, nil
