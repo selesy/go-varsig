@@ -123,6 +123,8 @@ func (v varsig) decodePayEncAndSig(r BytesReader) (PayloadEncoding, []byte, erro
 		if err == nil {
 			return 0, nil, ErrUnexpectedSignaturePresent
 		}
+	default:
+		return 0, nil, ErrUnsupportedVersion
 	}
 
 	return payEnc, signature, nil
