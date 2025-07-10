@@ -5,6 +5,8 @@ with limited (and soon to be deprecated) support for the `varsig` < v1.0
 specification.  This is predominantly included to support the UCAN v1.0
 use-case.
 
+Built with ❤️ by [Consensys](https://consensys.io/).
+
 ## Usage
 
 Include the `go-varsig` library by running the following command:
@@ -54,3 +56,10 @@ Since there's only one workflow, the simplest command to test it is:
 ```bash
 act
 ```
+
+## License
+
+This project is dual-licensed under Apache 2.0 and MIT terms:
+
+- Apache License, Version 2.0, ([LICENSE-APACHE](https://github.com/ucan-wg/go-varsig/blob/master/LICENSE-APACHE-2.0) or http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license ([LICENSE-MIT](https://github.com/ucan-wg/go-varsig/blob/master/LICENSE-MIT) or http://opensource.org/licenses/MIT)
