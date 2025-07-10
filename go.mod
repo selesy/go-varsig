@@ -1,6 +1,8 @@
 module github.com/ucan-wg/go-varsig
 
-go 1.24.4
+go 1.23.10
+
+toolchain go1.24.4
 
 require github.com/stretchr/testify v1.10.0
 
