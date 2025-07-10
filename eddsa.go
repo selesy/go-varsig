@@ -4,26 +4,24 @@ import (
 	"crypto/ed25519"
 	"encoding/binary"
 	"fmt"
-
-	"github.com/multiformats/go-multicodec"
 )
 
-// Constants containing multicodec.Code values that specify EdDSA signatures.
+// Constants containing values that specify EdDSA signatures.
 const (
-	DiscriminatorEdDSA   = Discriminator(multicodec.Ed25519Pub)
-	DiscriminatorEd25519 = Discriminator(multicodec.Ed25519Pub)
-	DiscriminatorEd448   = Discriminator(multicodec.Ed448Pub)
+	DiscriminatorEdDSA   = Discriminator(0xed)
+	DiscriminatorEd25519 = Discriminator(0xed)
+	DiscriminatorEd448   = Discriminator(0x1203)
 )
 
-// EdDSACurve are multicodec.Code values that specify which Edwards curve
-// is used when generating the signature.
+// EdDSACurve are values that specify which Edwards curve is used when
+// generating the signature.
 type EdDSACurve uint64
 
-// Constants describing the multicodec.Code for each specific Edwards
-// curve that can be encoded into a Varsig.
+// Constants describing the values for each specific Edwards curve that can
+// be encoded into a Varsig.
 const (
-	CurveEd25519 = EdDSACurve(multicodec.Ed25519Pub)
-	CurveEd448   = EdDSACurve(multicodec.Ed448Pub)
+	CurveEd25519 = EdDSACurve(0xed)
+	CurveEd448   = EdDSACurve(0x1203)
 )
 
 func decodeEdDSACurve(r BytesReader) (EdDSACurve, error) {
@@ -87,8 +85,8 @@ func (v EdDSAVarsig) Curve() EdDSACurve {
 	return v.curve
 }
 
-// HashAlgorithm returns the multicodec.Code describing the hash algorithm
-// used to hash the payload content before the signature is generated.
+// HashAlgorithm returns the value describing the hash algorithm used to hash
+// the payload content before the signature is generated.
 func (v EdDSAVarsig) HashAlgorithm() HashAlgorithm {
 	return v.hashAlg
 }
