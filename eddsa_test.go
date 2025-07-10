@@ -1,6 +1,7 @@
 package varsig_test
 
 import (
+	"encoding/base64"
 	"encoding/hex"
 	"testing"
 
@@ -54,5 +55,46 @@ func TestDecodeEd25519(t *testing.T) {
 			require.NotNil(t, v)
 			assert.Equal(t, append(hdr, sig...), v.Encode())
 		})
+	})
+}
+
+func TestUCANExampleV1(t *testing.T) {
+	t.Parallel()
+
+	// This test is the value shown in the UCAN v1.0.0 example, which is
+	// an EdDSA varsig = v1 with the Ed25519 curve, SHA2_256 hashing and
+	// DAG-CBOR content encoding.
+	example, err := base64.RawStdEncoding.DecodeString("NAHtAe0BE3E")
+	require.NoError(t, err)
+
+	t.Run("Decode", func(t *testing.T) {
+		t.Parallel()
+
+		v, err := varsig.Decode(example)
+		require.NoError(t, err)
+
+		rsaV, ok := v.(varsig.EdDSAVarsig)
+		require.True(t, ok)
+
+		assert.Equal(t, varsig.Version1, rsaV.Version())
+		assert.Equal(t, varsig.DiscriminatorEdDSA, rsaV.Discriminator())
+		assert.Equal(t, varsig.CurveEd25519, rsaV.Curve())
+		assert.Equal(t, varsig.HashAlgorithmSHA512, rsaV.HashAlgorithm())
+		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, rsaV.PayloadEncoding())
+		assert.Len(t, rsaV.Signature(), 0)
+	})
+
+	t.Run("Encode", func(t *testing.T) {
+		t.Parallel()
+
+		edDSAVarsig, err := varsig.NewEdDSAVarsig(
+			varsig.CurveEd25519,
+			varsig.HashAlgorithmSHA512,
+			varsig.PayloadEncodingDAGCBOR,
+		)
+		require.NoError(t, err)
+
+		assert.Equal(t, example, edDSAVarsig.Encode())
+		t.Log(base64.RawStdEncoding.EncodeToString(edDSAVarsig.Encode()))
 	})
 }

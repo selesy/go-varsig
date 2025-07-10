@@ -52,7 +52,7 @@ func TestRSAVarsig(t *testing.T) {
 	})
 }
 
-func TestUCANExample(t *testing.T) {
+func TestUCANExampleV0(t *testing.T) {
 	t.Parallel()
 
 	const keyLen = 0x100
