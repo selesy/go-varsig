@@ -3,26 +3,23 @@ package varsig
 import (
 	"encoding/binary"
 	"fmt"
-
-	"github.com/multiformats/go-multicodec"
 )
 
-// Prefix is the multicodec.Code for the varsig's varuint prefix byte.
-const Prefix = uint64(multicodec.Varsig)
+// Prefix is the value for the varsig's varuint prefix byte.
+const Prefix = uint64(0x34)
 
-// HashAlgorithm is the multicodec.Code that specifies the hash algorithm
+// HashAlgorithm is the value that specifies the hash algorithm
 // that's used to reduce the signed content
 type HashAlgorithm uint64
 
-// Constant multicodec.Code values that allow Varsig implementations to
-// specify how the payload content is hashed before the signature is
-// generated.
+// Constant values that allow Varsig implementations to specify how
+// the payload content is hashed before the signature is generated.
 const (
 	HashAlgorithmUnspecified HashAlgorithm = 0x00
-	HashAlgorithmSHA256                    = HashAlgorithm(multicodec.Sha2_256)
-	HashAlgorithmSHA384                    = HashAlgorithm(multicodec.Sha2_384)
-	HashAlgorithmSHA512                    = HashAlgorithm(multicodec.Sha2_512)
-	HashAlgorithmShake256                  = HashAlgorithm(multicodec.Shake256)
+	HashAlgorithmSHA256                    = HashAlgorithm(0x12)
+	HashAlgorithmSHA384                    = HashAlgorithm(0x20)
+	HashAlgorithmSHA512                    = HashAlgorithm(0x13)
+	HashAlgorithmShake256                  = HashAlgorithm(0x19)
 )
 
 // DecodeHashAlgorithm reads and validates the expected hash algorithm
@@ -51,16 +48,16 @@ func DecodeHashAlgorithm(r BytesReader) (HashAlgorithm, error) {
 // consistent hashes and signatures.
 type PayloadEncoding uint64
 
-// Constant multicodec.Code values that allow Varsig implementations to
-// specify how the payload content is encoded before being hashed.  In
-// varsig >= v1, only canonical encoding is allowed.
+// Constant values that allow Varsig implementations to specify how the
+// payload content is encoded before being hashed.
+// In varsig >= v1, only canonical encoding is allowed.
 const (
 	PayloadEncodingUnspecified PayloadEncoding = 0x00
 	PayloadEncodingVerbatim    PayloadEncoding = 0x5f
-	PayloadEncodingDAGPB                       = PayloadEncoding(multicodec.DagPb)
-	PayloadEncodingDAGCBOR                     = PayloadEncoding(multicodec.DagCbor)
-	PayloadEncodingDAGJSON                     = PayloadEncoding(multicodec.DagJson)
-	PayloadEncodingEIP191                      = PayloadEncoding(multicodec.Eip191)
+	PayloadEncodingDAGPB                       = PayloadEncoding(0x70)
+	PayloadEncodingDAGCBOR                     = PayloadEncoding(0x71)
+	PayloadEncodingDAGJSON                     = PayloadEncoding(0x0129)
+	PayloadEncodingEIP191                      = PayloadEncoding(0xd191)
 	PayloadEncodingJWT         PayloadEncoding = 0x6a77
 )
 
@@ -112,8 +109,8 @@ func decodeEncodingInfoV1(payEnc PayloadEncoding) (PayloadEncoding, error) {
 	}
 }
 
-// Discriminator is (usually) the multicodec.Code representing the public
-// key type of the algorithm used to create the signature.
+// Discriminator is (usually) the value representing the public key type of
+// the algorithm used to create the signature.
 //
 // There is not set list of constants here, nor is there a decode function
 // as the author of an implementation should include the constant with the

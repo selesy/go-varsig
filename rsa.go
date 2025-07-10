@@ -2,12 +2,10 @@ package varsig
 
 import (
 	"encoding/binary"
-
-	"github.com/multiformats/go-multicodec"
 )
 
-// DiscriminatorRSA is the multicodec.Code specifying an RSA signature.
-const DiscriminatorRSA = Discriminator(multicodec.RsaPub)
+// DiscriminatorRSA is the value specifying an RSA signature.
+const DiscriminatorRSA = Discriminator(0x1205)
 
 var _ Varsig = RSAVarsig{}
 
