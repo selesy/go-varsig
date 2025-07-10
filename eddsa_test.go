@@ -73,15 +73,15 @@ func TestUCANExampleV1(t *testing.T) {
 		v, err := varsig.Decode(example)
 		require.NoError(t, err)
 
-		rsaV, ok := v.(varsig.EdDSAVarsig)
+		ed25519V, ok := v.(varsig.EdDSAVarsig)
 		require.True(t, ok)
 
-		assert.Equal(t, varsig.Version1, rsaV.Version())
-		assert.Equal(t, varsig.DiscriminatorEdDSA, rsaV.Discriminator())
-		assert.Equal(t, varsig.CurveEd25519, rsaV.Curve())
-		assert.Equal(t, varsig.HashAlgorithmSHA512, rsaV.HashAlgorithm())
-		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, rsaV.PayloadEncoding())
-		assert.Len(t, rsaV.Signature(), 0)
+		assert.Equal(t, varsig.Version1, ed25519V.Version())
+		assert.Equal(t, varsig.DiscriminatorEdDSA, ed25519V.Discriminator())
+		assert.Equal(t, varsig.CurveEd25519, ed25519V.Curve())
+		assert.Equal(t, varsig.HashAlgorithmSHA512, ed25519V.HashAlgorithm())
+		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, ed25519V.PayloadEncoding())
+		assert.Len(t, ed25519V.Signature(), 0)
 	})
 
 	t.Run("Encode", func(t *testing.T) {
