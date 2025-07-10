@@ -31,7 +31,7 @@ repos:
     - id: my-cmd-repo
       alias: govulncheck
       name: govulncheck
-      args: ["bash", "-c", "go tool golang.org/x/vuln/cmd/govulncheck ./..."]
+      args: ["bash", "-c", "go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./..."]
 - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
   rev: v9.22.0
   hooks:
