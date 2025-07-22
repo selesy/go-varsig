@@ -89,7 +89,10 @@ func (v varsig) Signature() []byte {
 }
 
 func (v varsig) encode() []byte {
-	var buf []byte
+	// Pre-allocate to the maximum size to avoid re-allocating.
+	// I think the maximum is 10 bytes, but it's all the same for go to allocate 16 (due to the small
+	// size allocation class), so we might as well get some headroom for bigger varints.
+	buf := make([]byte, 0, 16)
 
 	buf = binary.AppendUvarint(buf, Prefix)
 
