@@ -30,7 +30,7 @@ func DefaultRegistry() Registry {
 	return map[Discriminator]DecodeFunc{
 		DiscriminatorRSA:   decodeRSA,
 		DiscriminatorEdDSA: decodeEdDSA,
-		DiscriminatorECDSA: notYetImplementedVarsigDecoder,
+		DiscriminatorECDSA: decodeECDSA,
 	}
 }
 
@@ -93,8 +93,4 @@ func (rs Registry) decodeVersAnddisc(r BytesReader) (Version, Discriminator, err
 	disc, err := binary.ReadUvarint(r)
 
 	return Version(vers), Discriminator(disc), err
-}
-
-func notYetImplementedVarsigDecoder(_ BytesReader, vers Version, disc Discriminator) (Varsig, error) {
-	return nil, fmt.Errorf("%w: Version: %d, Discriminator: %x", ErrNotYetImplemented, vers, disc)
 }
