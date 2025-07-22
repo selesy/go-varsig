@@ -32,7 +32,7 @@ func TestDecodeEd25519(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, v)
 			assert.Equal(t, varsig.Version0, v.Version())
-			assert.Equal(t, varsig.DiscriminatorEd25519, v.Discriminator())
+			assert.Equal(t, varsig.DiscriminatorEdDSA, v.Discriminator())
 			assert.Equal(t, varsig.PayloadEncodingDAGCBOR, v.PayloadEncoding())
 			assert.Len(t, v.Signature(), 64)
 
