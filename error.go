@@ -38,6 +38,10 @@ var ErrUnknownDiscriminator = errors.New("unknown signing algorithm")
 // CurveEd25519 or CurveEd448.
 var ErrUnknownEdDSACurve = errors.New("unknown Edwards curve")
 
+// ErrUnknownECDSACurve is returned when the decoded uvarint isn't either
+// CurveSecp256k1, CurveP256, CurveP384 or CurveP521.
+var ErrUnknownECDSACurve = errors.New("unknown ECDSA curve")
+
 // ErrUnsupportedVersion is returned when an unsupported varsig version
 // field is present.
 var ErrUnsupportedVersion = errors.New("unsupported version")
