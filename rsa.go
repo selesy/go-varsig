@@ -13,13 +13,13 @@ var _ Varsig = RSAVarsig{}
 // an RSA signature.
 type RSAVarsig struct {
 	varsig
-	hashAlg HashAlgorithm
+	hashAlg Hash
 	sigLen  uint64
 }
 
 // NewRSAVarsig creates and validates an RSA varsig with the provided
 // hash algorithm, key length and payload encoding.
-func NewRSAVarsig(hashAlgorithm HashAlgorithm, keyLength uint64, payloadEncoding PayloadEncoding, opts ...Option) (RSAVarsig, error) {
+func NewRSAVarsig(hashAlgorithm Hash, keyLength uint64, payloadEncoding PayloadEncoding, opts ...Option) (RSAVarsig, error) {
 	options := newOptions(opts...)
 
 	var (
@@ -57,8 +57,9 @@ func (v RSAVarsig) Encode() []byte {
 	return buf
 }
 
-// HashAlgorithm returns the hash algorithm used to has the payload content.
-func (v RSAVarsig) HashAlgorithm() HashAlgorithm {
+// Hash returns the value describing the hash algorithm used to hash
+// the payload content before the signature is generated.
+func (v RSAVarsig) Hash() Hash {
 	return v.hashAlg
 }
 

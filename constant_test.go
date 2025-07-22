@@ -18,24 +18,24 @@ func TestDecodeHashAlgorithm(t *testing.T) {
 
 		hashAlg, err := varsig.DecodeHashAlgorithm(bytes.NewReader([]byte{0x12}))
 		require.NoError(t, err)
-		require.Equal(t, varsig.HashAlgorithmSHA256, hashAlg)
+		require.Equal(t, varsig.HashSha2_256, hashAlg)
 	})
 
 	t.Run("fails - truncated varsig (no bytes)", func(t *testing.T) {
 		t.Parallel()
 
 		hashAlg, err := varsig.DecodeHashAlgorithm(bytes.NewReader([]byte{}))
-		require.ErrorIs(t, err, varsig.ErrUnknownHashAlgorithm)
+		require.ErrorIs(t, err, varsig.ErrUnknownHash)
 		require.ErrorIs(t, err, io.EOF)
-		require.Equal(t, varsig.HashAlgorithmUnspecified, hashAlg)
+		require.Equal(t, varsig.HashUnspecified, hashAlg)
 	})
 
 	t.Run("fails - unknown hash algorithm", func(t *testing.T) {
 		t.Parallel()
 
 		hashAlg, err := varsig.DecodeHashAlgorithm(bytes.NewReader([]byte{0x42}))
-		require.ErrorIs(t, err, varsig.ErrUnknownHashAlgorithm)
-		require.Equal(t, varsig.HashAlgorithmUnspecified, hashAlg)
+		require.ErrorIs(t, err, varsig.ErrUnknownHash)
+		require.Equal(t, varsig.HashUnspecified, hashAlg)
 	})
 }
 

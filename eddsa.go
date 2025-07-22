@@ -46,12 +46,12 @@ type EdDSAVarsig struct {
 	varsig
 
 	curve   EdDSACurve
-	hashAlg HashAlgorithm
+	hashAlg Hash
 }
 
 // NewEdDSAVarsig creates and validates an EdDSA varsig with the provided
 // curve, hash algorithm and payload encoding.
-func NewEdDSAVarsig(curve EdDSACurve, hashAlgorithm HashAlgorithm, payloadEncoding PayloadEncoding, opts ...Option) (EdDSAVarsig, error) {
+func NewEdDSAVarsig(curve EdDSACurve, hashAlgorithm Hash, payloadEncoding PayloadEncoding, opts ...Option) (EdDSAVarsig, error) {
 	options := newOptions(opts...)
 
 	var (
@@ -85,9 +85,9 @@ func (v EdDSAVarsig) Curve() EdDSACurve {
 	return v.curve
 }
 
-// HashAlgorithm returns the value describing the hash algorithm used to hash
+// Hash returns the value describing the hash algorithm used to hash
 // the payload content before the signature is generated.
-func (v EdDSAVarsig) HashAlgorithm() HashAlgorithm {
+func (v EdDSAVarsig) Hash() Hash {
 	return v.hashAlg
 }
 

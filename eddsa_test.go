@@ -39,7 +39,7 @@ func TestDecodeEd25519(t *testing.T) {
 			impl, ok := v.(varsig.EdDSAVarsig)
 			require.True(t, ok)
 			assert.Equal(t, varsig.CurveEd25519, impl.Curve())
-			assert.Equal(t, varsig.HashAlgorithmSHA512, impl.HashAlgorithm())
+			assert.Equal(t, varsig.HashSha2_512, impl.Hash())
 		})
 
 		t.Run("Encode", func(t *testing.T) {
@@ -47,7 +47,7 @@ func TestDecodeEd25519(t *testing.T) {
 
 			v, err := varsig.NewEdDSAVarsig(
 				varsig.CurveEd25519,
-				varsig.HashAlgorithmSHA512,
+				varsig.HashSha2_512,
 				varsig.PayloadEncodingDAGCBOR,
 				varsig.WithForceVersion0(sig),
 			)
@@ -79,7 +79,7 @@ func TestUCANExampleV1(t *testing.T) {
 		assert.Equal(t, varsig.Version1, ed25519V.Version())
 		assert.Equal(t, varsig.DiscriminatorEdDSA, ed25519V.Discriminator())
 		assert.Equal(t, varsig.CurveEd25519, ed25519V.Curve())
-		assert.Equal(t, varsig.HashAlgorithmSHA512, ed25519V.HashAlgorithm())
+		assert.Equal(t, varsig.HashSha2_512, ed25519V.Hash())
 		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, ed25519V.PayloadEncoding())
 		assert.Len(t, ed25519V.Signature(), 0)
 	})
@@ -89,7 +89,7 @@ func TestUCANExampleV1(t *testing.T) {
 
 		edDSAVarsig, err := varsig.NewEdDSAVarsig(
 			varsig.CurveEd25519,
-			varsig.HashAlgorithmSHA512,
+			varsig.HashSha2_512,
 			varsig.PayloadEncodingDAGCBOR,
 		)
 		require.NoError(t, err)

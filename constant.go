@@ -8,38 +8,70 @@ import (
 // Prefix is the value for the varsig's varuint prefix byte.
 const Prefix = uint64(0x34)
 
-// HashAlgorithm is the value that specifies the hash algorithm
+// Hash is the value that specifies the hash algorithm
 // that's used to reduce the signed content
-type HashAlgorithm uint64
+type Hash uint64
 
 // Constant values that allow Varsig implementations to specify how
 // the payload content is hashed before the signature is generated.
 const (
-	HashAlgorithmUnspecified HashAlgorithm = 0x00
-	HashAlgorithmSHA256                    = HashAlgorithm(0x12)
-	HashAlgorithmSHA384                    = HashAlgorithm(0x20)
-	HashAlgorithmSHA512                    = HashAlgorithm(0x13)
-	HashAlgorithmShake256                  = HashAlgorithm(0x19)
+	HashUnspecified Hash = 0x00
+
+	HashSha2_224 = Hash(0x1013)
+	HashSha2_256 = Hash(0x12)
+	HashSha2_384 = Hash(0x20)
+	HashSha2_512 = Hash(0x13)
+
+	HashSha3_224 = Hash(0x17)
+	HashSha3_256 = Hash(0x16)
+	HashSha3_384 = Hash(0x15)
+	HashSha3_512 = Hash(0x14)
+
+	HashSha512_224 = Hash(0x1014)
+	HashSha512_256 = Hash(0x1015)
+
+	HashBlake2s_256 = Hash(0xb260)
+	HashBlake2b_256 = Hash(0xb220)
+	HashBlake2b_384 = Hash(0xb230)
+	HashBlake2b_512 = Hash(0xb240)
+
+	HashShake_256 = Hash(0x19)
+
+	HashKeccak256 = Hash(0x1b)
+	HashKeccak512 = Hash(0x1d)
 )
 
 // DecodeHashAlgorithm reads and validates the expected hash algorithm
 // (for varsig types include a variable hash algorithm.)
-func DecodeHashAlgorithm(r BytesReader) (HashAlgorithm, error) {
+func DecodeHashAlgorithm(r BytesReader) (Hash, error) {
 	u, err := binary.ReadUvarint(r)
 	if err != nil {
-		return HashAlgorithmUnspecified, fmt.Errorf("%w: %w", ErrUnknownHashAlgorithm, err)
+		return HashUnspecified, fmt.Errorf("%w: %w", ErrUnknownHash, err)
 	}
 
-	h := HashAlgorithm(u)
+	h := Hash(u)
 
 	switch h {
-	case HashAlgorithmSHA256,
-		HashAlgorithmSHA384,
-		HashAlgorithmSHA512,
-		HashAlgorithmShake256:
+	case HashSha2_224,
+		HashSha2_256,
+		HashSha2_384,
+		HashSha2_512,
+		HashSha3_224,
+		HashSha3_256,
+		HashSha3_384,
+		HashSha3_512,
+		HashSha512_224,
+		HashSha512_256,
+		HashBlake2s_256,
+		HashBlake2b_256,
+		HashBlake2b_384,
+		HashBlake2b_512,
+		HashShake_256,
+		HashKeccak256,
+		HashKeccak512:
 		return h, nil
 	default:
-		return HashAlgorithmUnspecified, fmt.Errorf("%w: %x", ErrUnknownHashAlgorithm, h)
+		return HashUnspecified, fmt.Errorf("%w: %x", ErrUnknownHash, h)
 	}
 }
 
