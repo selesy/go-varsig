@@ -6,12 +6,8 @@ import (
 	"fmt"
 )
 
-// Constants containing values that specify EdDSA signatures.
-const (
-	DiscriminatorEdDSA   = Discriminator(0xed)
-	DiscriminatorEd25519 = Discriminator(0xed)
-	DiscriminatorEd448   = Discriminator(0x1203)
-)
+// DiscriminatorEdDSA is the value specifying an EdDSA signature.
+const DiscriminatorEdDSA = Discriminator(0xed)
 
 // EdDSACurve are values that specify which Edwards curve is used when
 // generating the signature.
@@ -113,7 +109,7 @@ func (v EdDSAVarsig) Encode() []byte {
 	return buf
 }
 
-func decodeEd25519(r BytesReader, vers Version, disc Discriminator) (Varsig, error) {
+func decodeEdDSA(r BytesReader, vers Version, disc Discriminator) (Varsig, error) {
 	curve := EdDSACurve(disc)
 	if vers != Version0 {
 		var err error

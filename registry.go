@@ -28,12 +28,9 @@ type Registry map[Discriminator]DecodeFunc
 // signing algorithms which have an implementation within this library.
 func DefaultRegistry() Registry {
 	return map[Discriminator]DecodeFunc{
-		DiscriminatorRSA:            decodeRSA,
-		DiscriminatorEdDSA:          decodeEd25519,
-		DiscriminatorEd448:          decodeEd25519,
-		DiscriminatorECDSAP256:      notYetImplementedVarsigDecoder,
-		DiscriminatorECDSASecp256k1: notYetImplementedVarsigDecoder,
-		DiscriminatorECDSAP521:      notYetImplementedVarsigDecoder,
+		DiscriminatorRSA:   decodeRSA,
+		DiscriminatorEdDSA: decodeEdDSA,
+		DiscriminatorECDSA: notYetImplementedVarsigDecoder,
 	}
 }
 
