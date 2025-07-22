@@ -31,7 +31,7 @@ func TestRSAVarsig(t *testing.T) {
 
 		assert.Equal(t, varsig.Version1, rsaVs.Version())
 		assert.Equal(t, varsig.DiscriminatorRSA, rsaVs.Discriminator())
-		assert.Equal(t, varsig.HashAlgorithmSHA256, rsaVs.HashAlgorithm())
+		assert.Equal(t, varsig.HashSha2_256, rsaVs.Hash())
 		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, rsaVs.PayloadEncoding())
 		assert.Equal(t, uint64(keyLen), rsaVs.KeyLength())
 		assert.Len(t, rsaVs.Signature(), 0)
@@ -41,7 +41,7 @@ func TestRSAVarsig(t *testing.T) {
 		t.Parallel()
 
 		rsaVarsig, err := varsig.NewRSAVarsig(
-			varsig.HashAlgorithmSHA256,
+			varsig.HashSha2_256,
 			keyLen,
 			varsig.PayloadEncodingDAGCBOR,
 		)
@@ -74,7 +74,7 @@ func TestUCANExampleV0(t *testing.T) {
 
 		assert.Equal(t, varsig.Version0, rsaVs.Version())
 		assert.Equal(t, varsig.DiscriminatorRSA, rsaVs.Discriminator())
-		assert.Equal(t, varsig.HashAlgorithmSHA256, rsaVs.HashAlgorithm())
+		assert.Equal(t, varsig.HashSha2_256, rsaVs.Hash())
 		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, rsaVs.PayloadEncoding())
 		assert.Equal(t, uint64(keyLen), rsaVs.KeyLength())
 		assert.Len(t, rsaVs.Signature(), 0)
@@ -84,7 +84,7 @@ func TestUCANExampleV0(t *testing.T) {
 		t.Parallel()
 
 		rsaVarsig, err := varsig.NewRSAVarsig(
-			varsig.HashAlgorithmSHA256,
+			varsig.HashSha2_256,
 			keyLen,
 			varsig.PayloadEncodingDAGCBOR,
 			varsig.WithForceVersion0([]byte{}),

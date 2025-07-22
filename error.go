@@ -21,9 +21,9 @@ var ErrUnexpectedSignaturePresent = errors.New("unexpected signature present in 
 // signing algorithm or sent via a Varsig field.
 var ErrUnexpectedSignatureSize = errors.New("unexpected signature size in varsig v0")
 
-// ErrUnknownHashAlgorithm is returned when an unexpected value is provided
+// ErrUnknownHash is returned when an unexpected value is provided
 // while decoding the hashing algorithm.
-var ErrUnknownHashAlgorithm = errors.New("unknown hash algorithm")
+var ErrUnknownHash = errors.New("unknown hash algorithm")
 
 // ErrUnsupportedPayloadEncoding is returned when an unexpected value is
 // provided while decoding the payload encoding field.  The allowed values
