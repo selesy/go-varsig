@@ -2,7 +2,6 @@ package varsig_test
 
 import (
 	"encoding/hex"
-	"errors"
 	"io"
 	"testing"
 
@@ -156,29 +155,4 @@ func TestDecode(t *testing.T) {
 		require.ErrorIs(t, err, varsig.ErrMissingSignature)
 		assert.NotNil(t, vs) // varsig is still returned with just "header"
 	})
-}
-
-func mustVarsig[T varsig.Varsig](t *testing.T, v T, err error) {
-	t.Helper()
-
-	if err != nil && (v.Version() != varsig.Version0 || !errors.Is(err, varsig.ErrMissingSignature)) {
-		t.Error(err)
-	}
-}
-
-func roundTrip[T varsig.Varsig](t *testing.T, in T, expEncHex string) T {
-	data := in.Encode()
-	assert.Equal(t, expEncHex, hex.EncodeToString(data))
-
-	out, err := varsig.Decode(in.Encode())
-	if err != nil && (out.Version() != varsig.Version0 || !errors.Is(err, varsig.ErrMissingSignature)) {
-		t.Fail()
-	}
-
-	assert.Equal(t, in.Version(), out.Version())
-	assert.Equal(t, in.Discriminator(), out.Discriminator())
-	assert.Equal(t, in.PayloadEncoding(), out.PayloadEncoding())
-	assert.Equal(t, in.Signature(), out.Signature())
-
-	return out.(T)
 }
