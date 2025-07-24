@@ -51,7 +51,7 @@ func (v RSAVarsig) Encode() []byte {
 	buf := v.encode()
 	buf = binary.AppendUvarint(buf, uint64(v.hashAlg))
 	buf = binary.AppendUvarint(buf, v.sigLen)
-	buf = binary.AppendUvarint(buf, uint64(v.payEnc))
+	buf = append(buf, EncodePayloadEncoding(v.payEnc)...)
 	buf = append(buf, v.Signature()...)
 
 	return buf

@@ -64,8 +64,8 @@ func TestRoundTrip(t *testing.T) {
 		},
 		{
 			name:    "EIP191",
-			varsig:  must(varsig.EIP191()),
-			dataHex: "3401ec01e7011b91a303",
+			varsig:  must(varsig.EIP191(varsig.PayloadEncodingEIP191Raw)),
+			dataHex: "3401ec01e7011b91c3035f",
 		},
 
 		// from https://github.com/hugomrdias/iso-repo/blob/main/packages/iso-ucan/test/varsig.test.js
@@ -89,16 +89,14 @@ func TestRoundTrip(t *testing.T) {
 			varsig:    must(varsig.ES256K(varsig.PayloadEncodingVerbatim)),
 			dataBytes: []byte{52, 1, 236, 1, 231, 1, 18, 95},
 		},
-		// the two cases below in iso-ucan are actually EIP191 preset where the encoding is overridden
-		// therefore, we build them manually.
 		{
 			name:      "EIP191+RAW",
-			varsig:    must(varsig.NewECDSAVarsig(varsig.CurveSecp256k1, varsig.HashKeccak256, varsig.PayloadEncodingVerbatim)),
+			varsig:    must(varsig.EIP191(varsig.PayloadEncodingEIP191Raw)),
 			dataBytes: []byte{52, 1, 236, 1, 231, 1, 27, 145, 195, 3, 95},
 		},
 		{
 			name:      "EIP191+DAG-CBOR",
-			varsig:    must(varsig.NewECDSAVarsig(varsig.CurveSecp256k1, varsig.HashKeccak256, varsig.PayloadEncodingDAGCBOR)),
+			varsig:    must(varsig.EIP191(varsig.PayloadEncodingEIP191Cbor)),
 			dataBytes: []byte{52, 1, 236, 1, 231, 1, 27, 145, 195, 3, 113},
 		},
 	} {

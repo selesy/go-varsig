@@ -106,7 +106,7 @@ func (v ECDSAVarsig) Encode() []byte {
 	}
 
 	buf = binary.AppendUvarint(buf, uint64(v.hashAlg))
-	buf = binary.AppendUvarint(buf, uint64(v.payEnc))
+	buf = append(buf, EncodePayloadEncoding(v.payEnc)...)
 	buf = append(buf, v.Signature()...)
 
 	return buf
