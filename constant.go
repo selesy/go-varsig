@@ -78,73 +78,129 @@ func DecodeHashAlgorithm(r BytesReader) (Hash, error) {
 // PayloadEncoding specifies the encoding of the data being (hashed and)
 // signed.  A canonical representation of the data is required to produce
 // consistent hashes and signatures.
-type PayloadEncoding uint64
+type PayloadEncoding int
 
 // Constant values that allow Varsig implementations to specify how the
 // payload content is encoded before being hashed.
 // In varsig >= v1, only canonical encoding is allowed.
 const (
-	PayloadEncodingUnspecified PayloadEncoding = 0x00
-	PayloadEncodingVerbatim    PayloadEncoding = 0x5f
-	PayloadEncodingDAGPB                       = PayloadEncoding(0x70)
-	PayloadEncodingDAGCBOR                     = PayloadEncoding(0x71)
-	PayloadEncodingDAGJSON                     = PayloadEncoding(0x0129)
-	PayloadEncodingEIP191                      = PayloadEncoding(0xd191)
-	PayloadEncodingJWT         PayloadEncoding = 0x6a77
+	PayloadEncodingUnspecified = PayloadEncoding(iota)
+	PayloadEncodingVerbatim
+	PayloadEncodingDAGPB
+	PayloadEncodingDAGCBOR
+	PayloadEncodingDAGJSON
+	PayloadEncodingEIP191Raw
+	PayloadEncodingEIP191Cbor
+	PayloadEncodingJWT
+)
+
+const (
+	encodingSegmentVerbatim = uint64(0x5f)
+	encodingSegmentDAGPB    = uint64(0x70)
+	encodingSegmentDAGCBOR  = uint64(0x71)
+	encodingSegmentDAGJSON  = uint64(0x0129)
+	encodingSegmentEIP191   = uint64(0xe191)
+	encodingSegmentJWT      = uint64(0x6a77)
 )
 
 // DecodePayloadEncoding reads and validates the expected canonical payload
 // encoding of the data to be signed.
 func DecodePayloadEncoding(r BytesReader, vers Version) (PayloadEncoding, error) {
-	u, err := binary.ReadUvarint(r)
+	seg1, err := binary.ReadUvarint(r)
 	if err != nil {
 		return PayloadEncodingUnspecified, fmt.Errorf("%w: %w", ErrUnsupportedPayloadEncoding, err)
 	}
 
-	payEnc := PayloadEncoding(u)
-
 	switch vers {
 	case Version0:
-		return decodeEncodingInfoV0(payEnc)
+		switch seg1 {
+		case encodingSegmentVerbatim:
+			return PayloadEncodingVerbatim, nil
+		case encodingSegmentDAGPB:
+			return PayloadEncodingDAGPB, nil
+		case encodingSegmentDAGCBOR:
+			return PayloadEncodingDAGCBOR, nil
+		case encodingSegmentDAGJSON:
+			return PayloadEncodingDAGJSON, nil
+		case encodingSegmentEIP191:
+			seg2, err := binary.ReadUvarint(r)
+			if err != nil {
+				return PayloadEncodingUnspecified, fmt.Errorf("%w: incomplete EIP191 encoding: %w", ErrUnsupportedPayloadEncoding, err)
+			}
+			switch seg2 {
+			case encodingSegmentVerbatim:
+				return PayloadEncodingEIP191Raw, nil
+			case encodingSegmentDAGCBOR:
+				return PayloadEncodingEIP191Cbor, nil
+			default:
+				return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x+%x", ErrUnsupportedPayloadEncoding, vers, seg1, seg2)
+			}
+		case encodingSegmentJWT:
+			return PayloadEncodingJWT, nil
+		default:
+			return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x", ErrUnsupportedPayloadEncoding, vers, seg1)
+		}
 	case Version1:
-		return decodeEncodingInfoV1(payEnc)
+		switch seg1 {
+		case encodingSegmentVerbatim:
+			return PayloadEncodingVerbatim, nil
+		case encodingSegmentDAGCBOR:
+			return PayloadEncodingDAGCBOR, nil
+		case encodingSegmentDAGJSON:
+			return PayloadEncodingDAGJSON, nil
+		case encodingSegmentEIP191:
+			seg2, err := binary.ReadUvarint(r)
+			if err != nil {
+				return PayloadEncodingUnspecified, fmt.Errorf("%w: incomplete EIP191 encoding: %w", ErrUnsupportedPayloadEncoding, err)
+			}
+			switch seg2 {
+			case encodingSegmentVerbatim:
+				return PayloadEncodingEIP191Raw, nil
+			case encodingSegmentDAGCBOR:
+				return PayloadEncodingEIP191Cbor, nil
+			default:
+				return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x+%x", ErrUnsupportedPayloadEncoding, vers, seg1, seg2)
+			}
+		default:
+			return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x", ErrUnsupportedPayloadEncoding, vers, seg1)
+		}
 	default:
 		return 0, ErrUnsupportedVersion
 	}
 }
 
-// https://github.com/ChainAgnostic/varsig#4-payload-encoding
-func decodeEncodingInfoV0(payEnc PayloadEncoding) (PayloadEncoding, error) {
-	switch payEnc {
-	case PayloadEncodingVerbatim,
-		PayloadEncodingDAGPB,
-		PayloadEncodingDAGCBOR,
-		PayloadEncodingDAGJSON,
-		PayloadEncodingJWT,
-		PayloadEncodingEIP191:
-		return payEnc, nil
+// EncodePayloadEncoding returns the PayloadEncoding as serialized bytes.
+// If enc is not a valid PayloadEncoding, this function will panic.
+func EncodePayloadEncoding(enc PayloadEncoding) []byte {
+	res := make([]byte, 0, 8)
+	switch enc {
+	case PayloadEncodingVerbatim:
+		res = binary.AppendUvarint(res, encodingSegmentVerbatim)
+	case PayloadEncodingDAGPB:
+		res = binary.AppendUvarint(res, encodingSegmentDAGPB)
+	case PayloadEncodingDAGCBOR:
+		res = binary.AppendUvarint(res, encodingSegmentDAGCBOR)
+	case PayloadEncodingDAGJSON:
+		res = binary.AppendUvarint(res, encodingSegmentDAGJSON)
+	case PayloadEncodingEIP191Raw:
+		res = binary.AppendUvarint(res, encodingSegmentEIP191)
+		res = binary.AppendUvarint(res, encodingSegmentVerbatim)
+	case PayloadEncodingEIP191Cbor:
+		res = binary.AppendUvarint(res, encodingSegmentEIP191)
+		res = binary.AppendUvarint(res, encodingSegmentDAGCBOR)
+	case PayloadEncodingJWT:
+		res = binary.AppendUvarint(res, encodingSegmentJWT)
 	default:
-		return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x", ErrUnsupportedPayloadEncoding, Version0, payEnc)
+		panic(fmt.Sprintf("invalid encoding: %v", enc))
 	}
-}
 
-// https://github.com/expede/varsig/blob/main/README.md#payload-encoding
-func decodeEncodingInfoV1(payEnc PayloadEncoding) (PayloadEncoding, error) {
-	switch payEnc {
-	case PayloadEncodingVerbatim,
-		PayloadEncodingDAGCBOR,
-		PayloadEncodingDAGJSON,
-		PayloadEncodingEIP191:
-		return payEnc, nil
-	default:
-		return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x", ErrUnsupportedPayloadEncoding, Version1, payEnc)
-	}
+	return res
 }
 
 // Discriminator is (usually) the value representing the public key type of
 // the algorithm used to create the signature.
 //
-// There is not set list of constants here, nor is there a decode function
+// There is no set list of constants here, nor is there a decode function
 // as the author of an implementation should include the constant with the
 // implementation, and the decoding is handled by the Handler, which uses
 // the Discriminator to choose the correct implementation.  Also note that

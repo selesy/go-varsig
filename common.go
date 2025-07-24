@@ -1,5 +1,7 @@
 package varsig
 
+import "fmt"
+
 // [IANA JOSE specification]: https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms
 
 // Ed25519 produces a varsig for EdDSA using Ed25519 curve.
@@ -58,7 +60,14 @@ func ES512(payloadEncoding PayloadEncoding, opts ...Option) (ECDSAVarsig, error)
 
 // EIP191 produces a varsig for ECDSA using the Secp256k1 curve, Keccak256 and encoded
 // with the "personal_sign" format defined by [EIP191].
+// payloadEncoding must be either PayloadEncodingEIP191Raw or PayloadEncodingEIP191Cbor.
 // [EIP191]: https://eips.ethereum.org/EIPS/eip-191
-func EIP191(opts ...Option) (ECDSAVarsig, error) {
-	return NewECDSAVarsig(CurveSecp256k1, HashKeccak256, PayloadEncodingEIP191, opts...)
+func EIP191(payloadEncoding PayloadEncoding, opts ...Option) (ECDSAVarsig, error) {
+	switch payloadEncoding {
+	case PayloadEncodingEIP191Raw, PayloadEncodingEIP191Cbor:
+	default:
+		return ECDSAVarsig{}, fmt.Errorf("%w for EIP191: %v", ErrUnsupportedPayloadEncoding, payloadEncoding)
+	}
+
+	return NewECDSAVarsig(CurveSecp256k1, HashKeccak256, payloadEncoding, opts...)
 }
