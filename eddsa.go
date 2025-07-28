@@ -1,7 +1,6 @@
 package varsig
 
 import (
-	"crypto/ed25519"
 	"encoding/binary"
 	"fmt"
 )
@@ -47,39 +46,14 @@ type EdDSAVarsig struct {
 
 // NewEdDSAVarsig creates and validates an EdDSA varsig with the provided
 // curve, hash algorithm and payload encoding.
-func NewEdDSAVarsig(curve EdDSACurve, hashAlgorithm Hash, payloadEncoding PayloadEncoding, opts ...Option) (EdDSAVarsig, error) {
-	options := newOptions(opts...)
-
-	var (
-		vers = Version1
-		disc = DiscriminatorEdDSA
-		sig  []byte
-	)
-
-	if options.ForceVersion0() {
-		vers = Version0
-		disc = Discriminator(curve)
-		sig = options.Signature()
-	}
-
-	v := EdDSAVarsig{
+func NewEdDSAVarsig(curve EdDSACurve, hashAlgorithm Hash, payloadEncoding PayloadEncoding) EdDSAVarsig {
+	return EdDSAVarsig{
 		varsig: varsig{
-			vers:   vers,
-			disc:   disc,
+			disc:   DiscriminatorEdDSA,
 			payEnc: payloadEncoding,
-			sig:    sig,
 		},
 		curve:   curve,
 		hashAlg: hashAlgorithm,
-	}
-
-	switch curve {
-	case CurveEd25519:
-		return validateSig(v, ed25519.SignatureSize)
-	case CurveEd448:
-		return validateSig(v, 114)
-	default:
-		return EdDSAVarsig{}, fmt.Errorf("%w: %x", ErrUnknownEdDSACurve, curve)
 	}
 }
 
@@ -98,26 +72,17 @@ func (v EdDSAVarsig) Hash() Hash {
 func (v EdDSAVarsig) Encode() []byte {
 	buf := v.encode()
 
-	if v.vers != Version0 {
-		buf = binary.AppendUvarint(buf, uint64(v.curve))
-	}
-
+	buf = binary.AppendUvarint(buf, uint64(v.curve))
 	buf = binary.AppendUvarint(buf, uint64(v.hashAlg))
 	buf = append(buf, EncodePayloadEncoding(v.payEnc)...)
-	buf = append(buf, v.Signature()...)
 
 	return buf
 }
 
-func decodeEdDSA(r BytesReader, vers Version, disc Discriminator) (Varsig, error) {
-	curve := EdDSACurve(disc)
-	if vers != Version0 {
-		var err error
-
-		curve, err = decodeEdDSACurve(r)
-		if err != nil {
-			return nil, err
-		}
+func decodeEdDSA(r BytesReader) (Varsig, error) {
+	curve, err := decodeEdDSACurve(r)
+	if err != nil {
+		return nil, err
 	}
 
 	hashAlg, err := DecodeHashAlgorithm(r)
@@ -125,26 +90,10 @@ func decodeEdDSA(r BytesReader, vers Version, disc Discriminator) (Varsig, error
 		return nil, err
 	}
 
-	v := EdDSAVarsig{
-		varsig: varsig{
-			vers: vers,
-			disc: disc,
-		},
-		curve:   curve,
-		hashAlg: hashAlg,
-	}
-
-	v.payEnc, v.sig, err = v.decodePayEncAndSig(r)
+	payEnc, err := DecodePayloadEncoding(r)
 	if err != nil {
 		return nil, err
 	}
 
-	switch curve {
-	case CurveEd25519:
-		return validateSig(v, ed25519.SignatureSize)
-	case CurveEd448:
-		return validateSig(v, 114)
-	default:
-		return EdDSAVarsig{}, fmt.Errorf("%w: %x", ErrUnknownEdDSACurve, curve)
-	}
+	return NewEdDSAVarsig(curve, hashAlg, payEnc), nil
 }

@@ -18,7 +18,7 @@ const (
 
 // DecodeFunc is a function that parses the varsig representing a specific
 // signing algorithm.
-type DecodeFunc func(BytesReader, Version, Discriminator) (Varsig, error)
+type DecodeFunc func(BytesReader) (Varsig, error)
 
 // Registry contains a mapping between known signing algorithms and
 // functions that can parse varsigs for that signing algorithm.
@@ -68,12 +68,16 @@ func (rs Registry) DecodeStream(r BytesReader) (Varsig, error) {
 		return nil, err
 	}
 
+	if vers != Version1 {
+		return nil, fmt.Errorf("%w: %d", ErrUnsupportedVersion, vers)
+	}
+
 	decodeFunc, ok := rs[Discriminator(disc)]
 	if !ok {
 		return nil, fmt.Errorf("%w: %x", ErrUnknownDiscriminator, disc)
 	}
 
-	return decodeFunc(r, vers, disc)
+	return decodeFunc(r)
 }
 
 func (rs Registry) decodeVersAnddisc(r BytesReader) (Version, Discriminator, error) {

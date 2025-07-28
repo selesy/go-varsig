@@ -37,8 +37,14 @@ const (
 
 	HashShake_256 = Hash(0x19)
 
-	HashKeccak256 = Hash(0x1b)
-	HashKeccak512 = Hash(0x1d)
+	HashKeccak_256 = Hash(0x1b)
+	HashKeccak_512 = Hash(0x1d)
+
+	// You should likely not use those:
+	HashRipemd_160 = Hash(0x1053)
+	HashMd4        = Hash(0xd4)
+	HashMd5        = Hash(0xd5)
+	HashSha1       = Hash(0x11)
 )
 
 // DecodeHashAlgorithm reads and validates the expected hash algorithm
@@ -67,8 +73,12 @@ func DecodeHashAlgorithm(r BytesReader) (Hash, error) {
 		HashBlake2b_384,
 		HashBlake2b_512,
 		HashShake_256,
-		HashKeccak256,
-		HashKeccak512:
+		HashKeccak_256,
+		HashKeccak_512,
+		HashRipemd_160,
+		HashMd4,
+		HashMd5,
+		HashSha1:
 		return h, nil
 	default:
 		return HashUnspecified, fmt.Errorf("%w: %x", ErrUnknownHash, h)
@@ -82,7 +92,6 @@ type PayloadEncoding int
 
 // Constant values that allow Varsig implementations to specify how the
 // payload content is encoded before being hashed.
-// In varsig >= v1, only canonical encoding is allowed.
 const (
 	PayloadEncodingUnspecified = PayloadEncoding(iota)
 	PayloadEncodingVerbatim
@@ -105,67 +114,34 @@ const (
 
 // DecodePayloadEncoding reads and validates the expected canonical payload
 // encoding of the data to be signed.
-func DecodePayloadEncoding(r BytesReader, vers Version) (PayloadEncoding, error) {
+func DecodePayloadEncoding(r BytesReader) (PayloadEncoding, error) {
 	seg1, err := binary.ReadUvarint(r)
 	if err != nil {
 		return PayloadEncodingUnspecified, fmt.Errorf("%w: %w", ErrUnsupportedPayloadEncoding, err)
 	}
 
-	switch vers {
-	case Version0:
-		switch seg1 {
-		case encodingSegmentVerbatim:
-			return PayloadEncodingVerbatim, nil
-		case encodingSegmentDAGPB:
-			return PayloadEncodingDAGPB, nil
-		case encodingSegmentDAGCBOR:
-			return PayloadEncodingDAGCBOR, nil
-		case encodingSegmentDAGJSON:
-			return PayloadEncodingDAGJSON, nil
-		case encodingSegmentEIP191:
-			seg2, err := binary.ReadUvarint(r)
-			if err != nil {
-				return PayloadEncodingUnspecified, fmt.Errorf("%w: incomplete EIP191 encoding: %w", ErrUnsupportedPayloadEncoding, err)
-			}
-			switch seg2 {
-			case encodingSegmentVerbatim:
-				return PayloadEncodingEIP191Raw, nil
-			case encodingSegmentDAGCBOR:
-				return PayloadEncodingEIP191Cbor, nil
-			default:
-				return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x+%x", ErrUnsupportedPayloadEncoding, vers, seg1, seg2)
-			}
-		case encodingSegmentJWT:
-			return PayloadEncodingJWT, nil
-		default:
-			return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x", ErrUnsupportedPayloadEncoding, vers, seg1)
+	switch seg1 {
+	case encodingSegmentVerbatim:
+		return PayloadEncodingVerbatim, nil
+	case encodingSegmentDAGCBOR:
+		return PayloadEncodingDAGCBOR, nil
+	case encodingSegmentDAGJSON:
+		return PayloadEncodingDAGJSON, nil
+	case encodingSegmentEIP191:
+		seg2, err := binary.ReadUvarint(r)
+		if err != nil {
+			return PayloadEncodingUnspecified, fmt.Errorf("%w: incomplete EIP191 encoding: %w", ErrUnsupportedPayloadEncoding, err)
 		}
-	case Version1:
-		switch seg1 {
+		switch seg2 {
 		case encodingSegmentVerbatim:
-			return PayloadEncodingVerbatim, nil
+			return PayloadEncodingEIP191Raw, nil
 		case encodingSegmentDAGCBOR:
-			return PayloadEncodingDAGCBOR, nil
-		case encodingSegmentDAGJSON:
-			return PayloadEncodingDAGJSON, nil
-		case encodingSegmentEIP191:
-			seg2, err := binary.ReadUvarint(r)
-			if err != nil {
-				return PayloadEncodingUnspecified, fmt.Errorf("%w: incomplete EIP191 encoding: %w", ErrUnsupportedPayloadEncoding, err)
-			}
-			switch seg2 {
-			case encodingSegmentVerbatim:
-				return PayloadEncodingEIP191Raw, nil
-			case encodingSegmentDAGCBOR:
-				return PayloadEncodingEIP191Cbor, nil
-			default:
-				return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x+%x", ErrUnsupportedPayloadEncoding, vers, seg1, seg2)
-			}
+			return PayloadEncodingEIP191Cbor, nil
 		default:
-			return PayloadEncodingUnspecified, fmt.Errorf("%w: version=%d, encoding=%x", ErrUnsupportedPayloadEncoding, vers, seg1)
+			return PayloadEncodingUnspecified, fmt.Errorf("%w: encoding=%x+%x", ErrUnsupportedPayloadEncoding, seg1, seg2)
 		}
 	default:
-		return 0, ErrUnsupportedVersion
+		return PayloadEncodingUnspecified, fmt.Errorf("%w: encoding=%x", ErrUnsupportedPayloadEncoding, seg1)
 	}
 }
 

@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ucan-wg/go-varsig"
@@ -29,68 +28,23 @@ func TestRSAVarsig(t *testing.T) {
 		rsaVs, ok := vs.(varsig.RSAVarsig)
 		require.True(t, ok)
 
-		assert.Equal(t, varsig.Version1, rsaVs.Version())
-		assert.Equal(t, varsig.DiscriminatorRSA, rsaVs.Discriminator())
-		assert.Equal(t, varsig.HashSha2_256, rsaVs.Hash())
-		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, rsaVs.PayloadEncoding())
-		assert.Equal(t, uint64(keyLen), rsaVs.KeyLength())
-		assert.Len(t, rsaVs.Signature(), 0)
+		require.Equal(t, varsig.Version1, rsaVs.Version())
+		require.Equal(t, varsig.DiscriminatorRSA, rsaVs.Discriminator())
+		require.Equal(t, varsig.HashSha2_256, rsaVs.Hash())
+		require.Equal(t, varsig.PayloadEncodingDAGCBOR, rsaVs.PayloadEncoding())
+		require.Equal(t, uint64(keyLen), rsaVs.KeyLength())
 	})
 
 	t.Run("Encode", func(t *testing.T) {
 		t.Parallel()
 
-		rsaVarsig, err := varsig.NewRSAVarsig(
+		rsaVarsig := varsig.NewRSAVarsig(
 			varsig.HashSha2_256,
 			keyLen,
 			varsig.PayloadEncodingDAGCBOR,
 		)
-		require.NoError(t, err)
 
-		assert.Equal(t, example, rsaVarsig.Encode())
+		require.Equal(t, example, rsaVarsig.Encode())
 		t.Log(base64.RawStdEncoding.EncodeToString(rsaVarsig.Encode()))
-	})
-}
-
-func TestUCANExampleV0(t *testing.T) {
-	t.Parallel()
-
-	const keyLen = 0x100
-
-	// This test is the value shown in the UCAN v1.0.0 example, which is
-	// an RSA varsig < v1 encoded as RS256 with a key length of 0x100
-	// bytes and DAG-CBOR payload encoding.
-	example, err := base64.RawStdEncoding.DecodeString("NIUkEoACcQ")
-	require.NoError(t, err)
-
-	t.Run("Decode", func(t *testing.T) {
-		t.Parallel()
-
-		vs, err := varsig.Decode(example)
-		require.ErrorIs(t, err, varsig.ErrMissingSignature)
-
-		rsaVs, ok := vs.(varsig.RSAVarsig)
-		require.True(t, ok)
-
-		assert.Equal(t, varsig.Version0, rsaVs.Version())
-		assert.Equal(t, varsig.DiscriminatorRSA, rsaVs.Discriminator())
-		assert.Equal(t, varsig.HashSha2_256, rsaVs.Hash())
-		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, rsaVs.PayloadEncoding())
-		assert.Equal(t, uint64(keyLen), rsaVs.KeyLength())
-		assert.Len(t, rsaVs.Signature(), 0)
-	})
-
-	t.Run("Encode", func(t *testing.T) {
-		t.Parallel()
-
-		rsaVarsig, err := varsig.NewRSAVarsig(
-			varsig.HashSha2_256,
-			keyLen,
-			varsig.PayloadEncodingDAGCBOR,
-			varsig.WithForceVersion0([]byte{}),
-		)
-		require.ErrorIs(t, err, varsig.ErrMissingSignature)
-
-		assert.Equal(t, example, rsaVarsig.Encode())
 	})
 }

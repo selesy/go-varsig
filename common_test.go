@@ -19,47 +19,47 @@ func TestRoundTrip(t *testing.T) {
 		// Arbitrary use of presets
 		{
 			name:    "Ed25519",
-			varsig:  must(varsig.Ed25519(varsig.PayloadEncodingDAGCBOR)),
+			varsig:  varsig.Ed25519(varsig.PayloadEncodingDAGCBOR),
 			dataHex: "3401ed01ed011371",
 		},
 		{
 			name:    "Ed448",
-			varsig:  must(varsig.Ed448(varsig.PayloadEncodingDAGCBOR)),
+			varsig:  varsig.Ed448(varsig.PayloadEncodingDAGCBOR),
 			dataHex: "3401ed0183241971",
 		},
 		{
 			name:    "RS256",
-			varsig:  must(varsig.RS256(0x100, varsig.PayloadEncodingDAGCBOR)),
+			varsig:  varsig.RS256(0x100, varsig.PayloadEncodingDAGCBOR),
 			dataHex: "3401852412800271",
 		},
 		{
 			name:    "RS384",
-			varsig:  must(varsig.RS384(0x100, varsig.PayloadEncodingDAGCBOR)),
+			varsig:  varsig.RS384(0x100, varsig.PayloadEncodingDAGCBOR),
 			dataHex: "3401852420800271",
 		},
 		{
 			name:    "RS512",
-			varsig:  must(varsig.RS512(0x100, varsig.PayloadEncodingDAGCBOR)),
+			varsig:  varsig.RS512(0x100, varsig.PayloadEncodingDAGCBOR),
 			dataHex: "3401852413800271",
 		},
 		{
 			name:    "ES256",
-			varsig:  must(varsig.ES256(varsig.PayloadEncodingDAGCBOR)),
+			varsig:  varsig.ES256(varsig.PayloadEncodingDAGCBOR),
 			dataHex: "3401ec0180241271",
 		},
 		{
 			name:    "ES256K",
-			varsig:  must(varsig.ES256K(varsig.PayloadEncodingDAGCBOR)),
+			varsig:  varsig.ES256K(varsig.PayloadEncodingDAGCBOR),
 			dataHex: "3401ec01e7011271",
 		},
 		{
 			name:    "ES384",
-			varsig:  must(varsig.ES384(varsig.PayloadEncodingDAGCBOR)),
+			varsig:  varsig.ES384(varsig.PayloadEncodingDAGCBOR),
 			dataHex: "3401ec0181242071",
 		},
 		{
 			name:    "ES512",
-			varsig:  must(varsig.ES512(varsig.PayloadEncodingDAGCBOR)),
+			varsig:  varsig.ES512(varsig.PayloadEncodingDAGCBOR),
 			dataHex: "3401ec0182241371",
 		},
 		{
@@ -71,22 +71,22 @@ func TestRoundTrip(t *testing.T) {
 		// from https://github.com/hugomrdias/iso-repo/blob/main/packages/iso-ucan/test/varsig.test.js
 		{
 			name:      "RS256+RAW",
-			varsig:    must(varsig.RS256(256, varsig.PayloadEncodingVerbatim)),
+			varsig:    varsig.RS256(256, varsig.PayloadEncodingVerbatim),
 			dataBytes: []byte{52, 1, 133, 36, 18, 128, 2, 95},
 		},
 		{
 			name:      "ES256+RAW",
-			varsig:    must(varsig.ES256(varsig.PayloadEncodingVerbatim)),
+			varsig:    varsig.ES256(varsig.PayloadEncodingVerbatim),
 			dataBytes: []byte{52, 1, 236, 1, 128, 36, 18, 95},
 		},
 		{
 			name:      "ES512+RAW",
-			varsig:    must(varsig.ES512(varsig.PayloadEncodingVerbatim)),
+			varsig:    varsig.ES512(varsig.PayloadEncodingVerbatim),
 			dataBytes: []byte{52, 1, 236, 1, 130, 36, 19, 95},
 		},
 		{
 			name:      "ES256K+RAW",
-			varsig:    must(varsig.ES256K(varsig.PayloadEncodingVerbatim)),
+			varsig:    varsig.ES256K(varsig.PayloadEncodingVerbatim),
 			dataBytes: []byte{52, 1, 236, 1, 231, 1, 18, 95},
 		},
 		{
@@ -117,7 +117,6 @@ func TestRoundTrip(t *testing.T) {
 			require.Equal(t, tc.varsig.Version(), rt.Version())
 			require.Equal(t, tc.varsig.Discriminator(), rt.Discriminator())
 			require.Equal(t, tc.varsig.PayloadEncoding(), rt.PayloadEncoding())
-			require.Equal(t, tc.varsig.Signature(), rt.Signature())
 
 			switch vs := tc.varsig.(type) {
 			case varsig.EdDSAVarsig:

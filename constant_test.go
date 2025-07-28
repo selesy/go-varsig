@@ -53,18 +53,10 @@ func TestDecodePayloadEncoding(t *testing.T) {
 	t.Run("passes", func(t *testing.T) {
 		t.Parallel()
 
-		t.Run("v0", func(t *testing.T) {
-			t.Parallel()
-
-			payEnc, err := varsig.DecodePayloadEncoding(bytes.NewReader([]byte{0x5f}), varsig.Version1)
-			require.NoError(t, err)
-			require.Equal(t, varsig.PayloadEncodingVerbatim, payEnc)
-		})
-
 		t.Run("v1", func(t *testing.T) {
 			t.Parallel()
 
-			payEnc, err := varsig.DecodePayloadEncoding(bytes.NewReader([]byte{0x5f}), varsig.Version1)
+			payEnc, err := varsig.DecodePayloadEncoding(bytes.NewReader([]byte{0x5f}))
 			require.NoError(t, err)
 			require.Equal(t, varsig.PayloadEncodingVerbatim, payEnc)
 		})
@@ -76,26 +68,12 @@ func TestDecodePayloadEncoding(t *testing.T) {
 		tests := []struct {
 			name string
 			data []byte
-			vers varsig.Version
 			err  error
 		}{
 			{
-				name: "unsupported encoding - v0",
-				data: []byte{0x42}, // random
-				vers: varsig.Version0,
-				err:  varsig.ErrUnsupportedPayloadEncoding,
-			},
-			{
-				name: "unsupported encoding - v1",
+				name: "unsupported encoding",
 				data: []byte{0x6a, 0x77}, // JWT
-				vers: varsig.Version1,
 				err:  varsig.ErrUnsupportedPayloadEncoding,
-			},
-			{
-				name: "unsupported version",
-				data: []byte{0x5f}, // Verbatim
-				vers: 99,           // random
-				err:  varsig.ErrUnsupportedVersion,
 			},
 		}
 
@@ -105,10 +83,8 @@ func TestDecodePayloadEncoding(t *testing.T) {
 				t.Parallel()
 
 				r := bytes.NewReader(tt.data)
-				_, err := varsig.DecodePayloadEncoding(r, tt.vers)
+				_, err := varsig.DecodePayloadEncoding(r)
 				require.ErrorIs(t, err, tt.err)
-				// t.Log(err)
-				// t.Fail()
 			})
 		}
 	})
@@ -118,6 +94,6 @@ func BenchmarkDecodePayloadEncoding(b *testing.B) {
 	b.ReportAllocs()
 	data := []byte{0x5f}
 	for i := 0; i < b.N; i++ {
-		_, _ = varsig.DecodePayloadEncoding(bytes.NewReader(data), varsig.Version1)
+		_, _ = varsig.DecodePayloadEncoding(bytes.NewReader(data))
 	}
 }
