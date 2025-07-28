@@ -48,41 +48,14 @@ type ECDSAVarsig struct {
 
 // NewECDSAVarsig creates and validates an ECDSA varsig with the provided
 // curve, hash algorithm and payload encoding.
-func NewECDSAVarsig(curve ECDSACurve, hashAlgorithm Hash, payloadEncoding PayloadEncoding, opts ...Option) (ECDSAVarsig, error) {
-	options := newOptions(opts...)
-
-	var (
-		vers = Version1
-		disc = DiscriminatorECDSA
-		sig  []byte
-	)
-
-	if options.ForceVersion0() {
-		vers = Version0
-		disc = Discriminator(curve)
-		sig = options.Signature()
-	}
-
-	v := ECDSAVarsig{
+func NewECDSAVarsig(curve ECDSACurve, hashAlgorithm Hash, payloadEncoding PayloadEncoding) ECDSAVarsig {
+	return ECDSAVarsig{
 		varsig: varsig{
-			vers:   vers,
-			disc:   disc,
+			disc:   DiscriminatorECDSA,
 			payEnc: payloadEncoding,
-			sig:    sig,
 		},
 		curve:   curve,
 		hashAlg: hashAlgorithm,
-	}
-
-	switch curve {
-	case CurveSecp256k1, CurveP256:
-		return validateSig(v, 64)
-	case CurveP384:
-		return validateSig(v, 96)
-	case CurveP521:
-		return validateSig(v, 132)
-	default:
-		return ECDSAVarsig{}, fmt.Errorf("%w: %x", ErrUnknownECDSACurve, curve)
 	}
 }
 
@@ -101,26 +74,17 @@ func (v ECDSAVarsig) Hash() Hash {
 func (v ECDSAVarsig) Encode() []byte {
 	buf := v.encode()
 
-	if v.vers != Version0 {
-		buf = binary.AppendUvarint(buf, uint64(v.curve))
-	}
-
+	buf = binary.AppendUvarint(buf, uint64(v.curve))
 	buf = binary.AppendUvarint(buf, uint64(v.hashAlg))
 	buf = append(buf, EncodePayloadEncoding(v.payEnc)...)
-	buf = append(buf, v.Signature()...)
 
 	return buf
 }
 
-func decodeECDSA(r BytesReader, vers Version, disc Discriminator) (Varsig, error) {
-	curve := ECDSACurve(disc)
-	if vers != Version0 {
-		var err error
-
-		curve, err = decodeECDSACurve(r)
-		if err != nil {
-			return nil, err
-		}
+func decodeECDSA(r BytesReader) (Varsig, error) {
+	curve, err := decodeECDSACurve(r)
+	if err != nil {
+		return nil, err
 	}
 
 	hashAlg, err := DecodeHashAlgorithm(r)
@@ -128,28 +92,10 @@ func decodeECDSA(r BytesReader, vers Version, disc Discriminator) (Varsig, error
 		return nil, err
 	}
 
-	v := ECDSAVarsig{
-		varsig: varsig{
-			vers: vers,
-			disc: disc,
-		},
-		curve:   curve,
-		hashAlg: hashAlg,
-	}
-
-	v.payEnc, v.sig, err = v.decodePayEncAndSig(r)
+	payEnc, err := DecodePayloadEncoding(r)
 	if err != nil {
 		return nil, err
 	}
 
-	switch curve {
-	case CurveSecp256k1, CurveP256:
-		return validateSig(v, 64)
-	case CurveP384:
-		return validateSig(v, 96)
-	case CurveP521:
-		return validateSig(v, 132)
-	default:
-		return ECDSAVarsig{}, fmt.Errorf("%w: %x", ErrUnknownECDSACurve, curve)
-	}
+	return NewECDSAVarsig(curve, hashAlg, payEnc), nil
 }

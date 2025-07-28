@@ -58,17 +58,6 @@ func TestDecode(t *testing.T) {
 		assert.Nil(t, vs)
 	})
 
-	t.Run("fails - unknown signature algorithm - v0", func(t *testing.T) {
-		t.Parallel()
-
-		data, err := hex.DecodeString("3464")
-		require.NoError(t, err)
-
-		vs, err := varsig.Decode(data)
-		require.ErrorIs(t, err, varsig.ErrUnknownDiscriminator)
-		assert.Nil(t, vs)
-	})
-
 	t.Run("fails - unknown signature algorithm - v1", func(t *testing.T) {
 		t.Parallel()
 
@@ -87,7 +76,6 @@ func TestDecode(t *testing.T) {
 		rsaHex    = "8524"
 		sha256Hex = "12"
 		keyLen    = "8002"
-		rsaBaseV0 = "34" + rsaHex + sha256Hex + keyLen
 		rsaBaseV1 = "3401" + rsaHex + sha256Hex + keyLen
 	)
 
@@ -122,37 +110,5 @@ func TestDecode(t *testing.T) {
 		vs, err := varsig.Decode(data)
 		require.ErrorIs(t, err, varsig.ErrUnsupportedPayloadEncoding)
 		assert.Nil(t, vs)
-	})
-
-	t.Run("fails - unexpected signature length - v0", func(t *testing.T) {
-		t.Parallel()
-
-		data, err := hex.DecodeString(rsaBaseV0 + "5f" + "42") // 0x42 is only a single byte - 256 bytes are expected
-		require.NoError(t, err)
-
-		vs, err := varsig.Decode(data)
-		require.ErrorIs(t, err, varsig.ErrUnexpectedSignatureSize)
-		assert.Zero(t, vs)
-	})
-
-	t.Run("fails - unexpected signature present - v1", func(t *testing.T) {
-		t.Parallel()
-
-		data, err := hex.DecodeString(rsaBaseV1 + "5f" + "42") // 0x42 is only a single byte - 256 bytes are expected
-		require.NoError(t, err)
-
-		vs, err := varsig.Decode(data)
-		require.ErrorIs(t, err, varsig.ErrUnexpectedSignaturePresent)
-		assert.Nil(t, vs)
-	})
-
-	t.Run("passes with error - v0", func(t *testing.T) {
-		t.Parallel()
-		data, err := hex.DecodeString(rsaBaseV0 + "5f")
-		require.NoError(t, err)
-
-		vs, err := varsig.Decode(data)
-		require.ErrorIs(t, err, varsig.ErrMissingSignature)
-		assert.NotNil(t, vs) // varsig is still returned with just "header"
 	})
 }
