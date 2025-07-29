@@ -1,9 +1,6 @@
 # go-varsig
 
-`go-varsig` implements the upcoming v1.0.0 release of the [`varsig` specification](https://github.com/ChainAgnostic/varsig/pull/18)
-with limited (and soon to be deprecated) support for the `varsig` < v1.0
-specification.  This is predominantly included to support the UCAN v1.0
-use-case.
+`go-varsig` is a go implementation of the [`varsig` specification](https://github.com/ChainAgnostic/varsig).
 
 Built with ❤️ by [Consensys](https://consensys.io/).
 
@@ -51,7 +48,7 @@ simulate the `docker` daemon:
 export DOCKER_HOST=unix:///var/run/podman/podman.sock
 ```
 
-Since there's only one workflow, the simplest command to test it is:
+The simplest command to test it is:
 
 ```bash
 act

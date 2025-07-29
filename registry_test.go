@@ -61,6 +61,10 @@ func (v testVarsig) Discriminator() varsig.Discriminator {
 	return v.disc
 }
 
+func (v testVarsig) Hash() varsig.Hash {
+	return varsig.HashUnspecified
+}
+
 func (v testVarsig) PayloadEncoding() varsig.PayloadEncoding {
 	return v.payEnc
 }
