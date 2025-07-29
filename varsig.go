@@ -32,6 +32,9 @@ type Varsig interface {
 	// Discriminator returns the algorithm used to produce the corresponding signature.
 	Discriminator() Discriminator
 
+	// Hash returns the hash used on the data before signature.
+	Hash() Hash
+
 	// PayloadEncoding returns the codec that was used to encode the signed data.
 	PayloadEncoding() PayloadEncoding
 
