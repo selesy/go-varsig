@@ -29,7 +29,7 @@ func TestUCANExampleV1(t *testing.T) {
 		require.True(t, ok)
 
 		assert.Equal(t, varsig.Version1, ed25519V.Version())
-		assert.Equal(t, varsig.DiscriminatorEdDSA, ed25519V.Discriminator())
+		assert.Equal(t, varsig.AlgorithmEdDSA, ed25519V.Algorithm())
 		assert.Equal(t, varsig.CurveEd25519, ed25519V.Curve())
 		assert.Equal(t, varsig.HashSha2_512, ed25519V.Hash())
 		assert.Equal(t, varsig.PayloadEncodingDAGCBOR, ed25519V.PayloadEncoding())

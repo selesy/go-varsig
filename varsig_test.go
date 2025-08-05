@@ -21,13 +21,13 @@ func ExampleDecode() {
 	handleErr(err)
 
 	fmt.Printf("%T\n", vs)
-	fmt.Printf("Discriminator: %d\n", vs.Discriminator())
+	fmt.Printf("Algorithm: %d\n", vs.Algorithm())
 	fmt.Printf("Hash: %d\n", vs.Hash())
 	fmt.Printf("PayloadEncoding: %d\n", vs.PayloadEncoding())
 
 	// Output:
 	// varsig.EdDSAVarsig
-	// Discriminator: 237
+	// Algorithm: 237
 	// Hash: 19
 	// PayloadEncoding: 3
 }
@@ -100,7 +100,7 @@ func TestDecode(t *testing.T) {
 		require.NoError(t, err)
 
 		vs, err := varsig.Decode(data)
-		require.ErrorIs(t, err, varsig.ErrUnknownDiscriminator)
+		require.ErrorIs(t, err, varsig.ErrUnknownAlgorithm)
 		assert.Nil(t, vs)
 	})
 

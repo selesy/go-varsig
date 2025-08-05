@@ -21,35 +21,35 @@ func TestRegistry_Decode(t *testing.T) {
 		vs, err := reg.DecodeStream(bytes.NewReader(data))
 		require.NoError(t, err)
 		assert.Equal(t, varsig.Version1, vs.Version())
-		assert.Equal(t, testDiscriminator1, vs.Discriminator())
+		assert.Equal(t, testAlgorithm1, vs.Algorithm())
 	})
 }
 
 const (
-	testDiscriminator0 varsig.Discriminator = 0x1000
-	testDiscriminator1 varsig.Discriminator = 0x1001
+	testAlgorithm0 varsig.Algorithm = 0x1000
+	testAlgorithm1 varsig.Algorithm = 0x1001
 )
 
 func testRegistry(t *testing.T) varsig.Registry {
 	t.Helper()
 
 	reg := varsig.NewRegistry()
-	reg.Register(testDiscriminator0, testDecodeFunc(testDiscriminator0))
-	reg.Register(testDiscriminator1, testDecodeFunc(testDiscriminator1))
+	reg.Register(testAlgorithm0, testDecodeFunc(testAlgorithm0))
+	reg.Register(testAlgorithm1, testDecodeFunc(testAlgorithm1))
 
 	return reg
 }
 
-func testDecodeFunc(disc varsig.Discriminator) varsig.DecodeFunc {
+func testDecodeFunc(algo varsig.Algorithm) varsig.DecodeFunc {
 	return func(r varsig.BytesReader) (varsig.Varsig, error) {
-		return &testVarsig{disc: disc}, nil
+		return &testVarsig{algo: algo}, nil
 	}
 }
 
 var _ varsig.Varsig = testVarsig{}
 
 type testVarsig struct {
-	disc   varsig.Discriminator
+	algo   varsig.Algorithm
 	payEnc varsig.PayloadEncoding
 }
 
@@ -57,8 +57,8 @@ func (v testVarsig) Version() varsig.Version {
 	return varsig.Version1
 }
 
-func (v testVarsig) Discriminator() varsig.Discriminator {
-	return v.disc
+func (v testVarsig) Algorithm() varsig.Algorithm {
+	return v.algo
 }
 
 func (v testVarsig) Hash() varsig.Hash {

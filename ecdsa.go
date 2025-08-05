@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// DiscriminatorECDSA is the value specifying an ECDSA signature.
-const DiscriminatorECDSA = Discriminator(0xec)
+// AlgorithmECDSA is the value specifying an ECDSA signature.
+const AlgorithmECDSA = Algorithm(0xec)
 
 // ECDSACurve are values that specify which ECDSA curve is used when
 // generating the signature.
@@ -51,7 +51,7 @@ type ECDSAVarsig struct {
 func NewECDSAVarsig(curve ECDSACurve, hashAlgorithm Hash, payloadEncoding PayloadEncoding) ECDSAVarsig {
 	return ECDSAVarsig{
 		varsig: varsig{
-			disc:   DiscriminatorECDSA,
+			algo:   AlgorithmECDSA,
 			payEnc: payloadEncoding,
 		},
 		curve:   curve,

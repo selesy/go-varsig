@@ -29,7 +29,7 @@ func TestRSAVarsig(t *testing.T) {
 		require.True(t, ok)
 
 		require.Equal(t, varsig.Version1, rsaVs.Version())
-		require.Equal(t, varsig.DiscriminatorRSA, rsaVs.Discriminator())
+		require.Equal(t, varsig.AlgorithmRSA, rsaVs.Algorithm())
 		require.Equal(t, varsig.HashSha2_256, rsaVs.Hash())
 		require.Equal(t, varsig.PayloadEncodingDAGCBOR, rsaVs.PayloadEncoding())
 		require.Equal(t, uint64(keyLen), rsaVs.KeyLength())

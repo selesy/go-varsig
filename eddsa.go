@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// DiscriminatorEdDSA is the value specifying an EdDSA signature.
-const DiscriminatorEdDSA = Discriminator(0xed)
+// AlgorithmEdDSA is the value specifying an EdDSA signature.
+const AlgorithmEdDSA = Algorithm(0xed)
 
 // EdDSACurve are values that specify which Edwards curve is used when
 // generating the signature.
@@ -49,7 +49,7 @@ type EdDSAVarsig struct {
 func NewEdDSAVarsig(curve EdDSACurve, hashAlgorithm Hash, payloadEncoding PayloadEncoding) EdDSAVarsig {
 	return EdDSAVarsig{
 		varsig: varsig{
-			disc:   DiscriminatorEdDSA,
+			algo:   AlgorithmEdDSA,
 			payEnc: payloadEncoding,
 		},
 		curve:   curve,
