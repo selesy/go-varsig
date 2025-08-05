@@ -12,6 +12,43 @@ Include the `go-varsig` library by running the following command:
 go get github.com/ucan-wg/go-varsig@latest
 ```
 
+## Quickstart
+
+```go
+func ExampleDecode() {
+	example, err := base64.RawStdEncoding.DecodeString("NAHtAe0BE3E")
+	handleErr(err)
+
+	vs, err := varsig.Decode(example)
+	handleErr(err)
+
+	fmt.Printf("%T\n", vs)
+	fmt.Printf("Discriminator: %d\n", vs.Discriminator())
+	fmt.Printf("Hash: %d\n", vs.Hash())
+	fmt.Printf("PayloadEncoding: %d\n", vs.PayloadEncoding())
+
+	// Output:
+	// varsig.EdDSAVarsig
+	// Discriminator: 237
+	// Hash: 19
+	// PayloadEncoding: 3
+}
+
+func ExampleEncode() {
+	edDSAVarsig := varsig.NewEdDSAVarsig(
+		varsig.CurveEd25519,
+		varsig.HashSha2_512,
+		varsig.PayloadEncodingDAGCBOR,
+	)
+
+	b64 := base64.RawStdEncoding.EncodeToString(edDSAVarsig.Encode())
+	fmt.Print(b64)
+
+	// Output:
+	// NAHtAe0BE3E
+}
+```
+
 ## Documentation
 
 Documentation for this library is provided as Go docs at
