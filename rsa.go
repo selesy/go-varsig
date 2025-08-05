@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 )
 
-// DiscriminatorRSA is the value specifying an RSA signature.
-const DiscriminatorRSA = Discriminator(0x1205)
+// AlgorithmRSA is the value specifying an RSA signature.
+const AlgorithmRSA = Algorithm(0x1205)
 
 var _ Varsig = RSAVarsig{}
 
@@ -22,7 +22,7 @@ type RSAVarsig struct {
 func NewRSAVarsig(hashAlgorithm Hash, keyLen uint64, payloadEncoding PayloadEncoding) RSAVarsig {
 	return RSAVarsig{
 		varsig: varsig{
-			disc:   DiscriminatorRSA,
+			algo:   AlgorithmRSA,
 			payEnc: payloadEncoding,
 		},
 		hashAlg: hashAlgorithm,

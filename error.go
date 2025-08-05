@@ -16,9 +16,9 @@ var ErrUnknownHash = errors.New("unknown hash algorithm")
 // for this field may vary based on the varsig version.
 var ErrUnsupportedPayloadEncoding = errors.New("unsupported payload encoding")
 
-// ErrUnknownDiscriminator is returned when the Registry doesn't have a
+// ErrUnknownAlgorithm is returned when the Registry doesn't have a
 // parsing function for the decoded signing algorithm.
-var ErrUnknownDiscriminator = errors.New("unknown signing algorithm")
+var ErrUnknownAlgorithm = errors.New("unknown signing algorithm")
 
 // ErrUnknownEdDSACurve is returned when the decoded uvarint isn't either
 // CurveEd25519 or CurveEd448.

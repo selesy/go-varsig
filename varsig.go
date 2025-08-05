@@ -29,8 +29,8 @@ type Varsig interface {
 	// Version returns the varsig's version field.
 	Version() Version
 
-	// Discriminator returns the algorithm used to produce the corresponding signature.
-	Discriminator() Discriminator
+	// Algorithm returns the algorithm used to produce the corresponding signature.
+	Algorithm() Algorithm
 
 	// Hash returns the hash used on the data before signature.
 	Hash() Hash
@@ -55,7 +55,7 @@ func DecodeStream(r BytesReader) (Varsig, error) {
 }
 
 type varsig struct {
-	disc   Discriminator
+	algo   Algorithm
 	payEnc PayloadEncoding
 }
 
@@ -64,10 +64,10 @@ func (v varsig) Version() Version {
 	return Version1
 }
 
-// Discriminator returns the algorithm used to produce the corresponding
+// Algorithm returns the algorithm used to produce the corresponding
 // signature.
-func (v varsig) Discriminator() Discriminator {
-	return v.disc
+func (v varsig) Algorithm() Algorithm {
+	return v.algo
 }
 
 // PayloadEncoding returns the codec that was used to encode the signed
@@ -84,7 +84,7 @@ func (v varsig) encode() []byte {
 
 	buf = binary.AppendUvarint(buf, Prefix)
 	buf = binary.AppendUvarint(buf, uint64(Version1))
-	buf = binary.AppendUvarint(buf, uint64(v.disc))
+	buf = binary.AppendUvarint(buf, uint64(v.algo))
 
 	return buf
 }

@@ -173,14 +173,14 @@ func EncodePayloadEncoding(enc PayloadEncoding) []byte {
 	return res
 }
 
-// Discriminator is (usually) the value representing the public key type of
+// Algorithm is (usually) the value representing the public key type of
 // the algorithm used to create the signature.
 //
 // There is no set list of constants here, nor is there a decode function
 // as the author of an implementation should include the constant with the
 // implementation, and the decoding is handled by the Handler, which uses
-// the Discriminator to choose the correct implementation.  Also note that
-// some of the Discriminator values for a specific implementation have
+// the Algorithm to choose the correct implementation.  Also note that
+// some of the Algorithm values for a specific implementation have
 // changed between varsig v0 and v1, so it's possible to have more than one
 // constant defined per implementation.
-type Discriminator uint64
+type Algorithm uint64

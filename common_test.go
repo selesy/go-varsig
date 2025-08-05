@@ -115,7 +115,7 @@ func TestRoundTrip(t *testing.T) {
 			require.NoError(t, err)
 
 			require.Equal(t, tc.varsig.Version(), rt.Version())
-			require.Equal(t, tc.varsig.Discriminator(), rt.Discriminator())
+			require.Equal(t, tc.varsig.Algorithm(), rt.Algorithm())
 			require.Equal(t, tc.varsig.PayloadEncoding(), rt.PayloadEncoding())
 
 			switch vs := tc.varsig.(type) {

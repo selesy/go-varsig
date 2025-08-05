@@ -22,15 +22,15 @@ type DecodeFunc func(BytesReader) (Varsig, error)
 
 // Registry contains a mapping between known signing algorithms and
 // functions that can parse varsigs for that signing algorithm.
-type Registry map[Discriminator]DecodeFunc
+type Registry map[Algorithm]DecodeFunc
 
 // DefaultRegistry provides a Registry containing the mappings for the
 // signing algorithms which have an implementation within this library.
 func DefaultRegistry() Registry {
-	return map[Discriminator]DecodeFunc{
-		DiscriminatorRSA:   decodeRSA,
-		DiscriminatorEdDSA: decodeEdDSA,
-		DiscriminatorECDSA: decodeECDSA,
+	return map[Algorithm]DecodeFunc{
+		AlgorithmRSA:   decodeRSA,
+		AlgorithmEdDSA: decodeEdDSA,
+		AlgorithmECDSA: decodeECDSA,
 	}
 }
 
@@ -41,7 +41,7 @@ func NewRegistry() Registry {
 
 // Register allows new mappings between a signing algorithm and its parsing
 // function to the Registry.
-func (rs Registry) Register(alg Discriminator, decodeFunc DecodeFunc) {
+func (rs Registry) Register(alg Algorithm, decodeFunc DecodeFunc) {
 	rs[alg] = decodeFunc
 }
 
@@ -63,7 +63,7 @@ func (rs Registry) DecodeStream(r BytesReader) (Varsig, error) {
 		return nil, fmt.Errorf("%w: expected %d, got %d", ErrBadPrefix, Prefix, pre)
 	}
 
-	vers, disc, err := rs.decodeVersAnddisc(r)
+	vers, algo, err := rs.decodeVersAndAlgo(r)
 	if err != nil {
 		return nil, err
 	}
@@ -72,15 +72,15 @@ func (rs Registry) DecodeStream(r BytesReader) (Varsig, error) {
 		return nil, fmt.Errorf("%w: %d", ErrUnsupportedVersion, vers)
 	}
 
-	decodeFunc, ok := rs[Discriminator(disc)]
+	decodeFunc, ok := rs[Algorithm(algo)]
 	if !ok {
-		return nil, fmt.Errorf("%w: %x", ErrUnknownDiscriminator, disc)
+		return nil, fmt.Errorf("%w: %x", ErrUnknownAlgorithm, algo)
 	}
 
 	return decodeFunc(r)
 }
 
-func (rs Registry) decodeVersAnddisc(r BytesReader) (Version, Discriminator, error) {
+func (rs Registry) decodeVersAndAlgo(r BytesReader) (Version, Algorithm, error) {
 	vers, err := binary.ReadUvarint(r)
 	if err != nil {
 		return Version(vers), 0, err
@@ -91,10 +91,10 @@ func (rs Registry) decodeVersAnddisc(r BytesReader) (Version, Discriminator, err
 	}
 
 	if vers >= 64 {
-		return 0, Discriminator(vers), nil
+		return 0, Algorithm(vers), nil
 	}
 
-	disc, err := binary.ReadUvarint(r)
+	algo, err := binary.ReadUvarint(r)
 
-	return Version(vers), Discriminator(disc), err
+	return Version(vers), Algorithm(algo), err
 }
