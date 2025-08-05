@@ -1,7 +1,9 @@
 package varsig_test
 
 import (
+	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"testing"
 
@@ -10,6 +12,39 @@ import (
 
 	"github.com/ucan-wg/go-varsig"
 )
+
+func ExampleDecode() {
+	example, err := base64.RawStdEncoding.DecodeString("NAHtAe0BE3E")
+	handleErr(err)
+
+	vs, err := varsig.Decode(example)
+	handleErr(err)
+
+	fmt.Printf("%T\n", vs)
+	fmt.Printf("Discriminator: %d\n", vs.Discriminator())
+	fmt.Printf("Hash: %d\n", vs.Hash())
+	fmt.Printf("PayloadEncoding: %d\n", vs.PayloadEncoding())
+
+	// Output:
+	// varsig.EdDSAVarsig
+	// Discriminator: 237
+	// Hash: 19
+	// PayloadEncoding: 3
+}
+
+func ExampleEncode() {
+	edDSAVarsig := varsig.NewEdDSAVarsig(
+		varsig.CurveEd25519,
+		varsig.HashSha2_512,
+		varsig.PayloadEncodingDAGCBOR,
+	)
+
+	b64 := base64.RawStdEncoding.EncodeToString(edDSAVarsig.Encode())
+	fmt.Print(b64)
+
+	// Output:
+	// NAHtAe0BE3E
+}
 
 func TestDecode(t *testing.T) {
 	t.Parallel()
@@ -111,4 +146,10 @@ func TestDecode(t *testing.T) {
 		require.ErrorIs(t, err, varsig.ErrUnsupportedPayloadEncoding)
 		assert.Nil(t, vs)
 	})
+}
+
+func handleErr(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
